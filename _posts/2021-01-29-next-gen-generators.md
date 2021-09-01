@@ -14,13 +14,13 @@ permalink: "next-gen-generators"
 ___
 &nbsp;
 # Quick Intro & Motivation
-I'm a fan of generators and python's approach to it in particular. At the base level of it I believe it allow for some pretty concise and expressive implementations of iteration, as well as handing out a pretty ergonomic handle to lazy evaluation when needed.
+One of python's best features is, in my opinion, generator. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
 
-However, I think there's a lot more to them than meets the eye. As it turns out you could do a lot more then just yielding out and later collecting a bunch of values them at a different point.
+That being said, there's a lot more to them than meets the eye. You could do a lot more than to just iterate and collect data.
 
- In this article I will explore some lesser known, (/used even) capabilities of generators in CPython. Whether you've already encountered some of these stuff or not, I hope you get something new out of the experimentations we'll conduct with the following concepts. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.
+ In this article I will explore some lesser known, (/used even) capabilities of generators in CPython. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.
 
-Requires basic knowledge of generators and common use cases, maybe some decorators and higher order function, but not something too extreme. Though I will of course try my best to point out stuff and clarify and provide valid sources for things along the way.
+Requires basic understanding of generators and common use cases, maybe some decorators and higher order functions, but not something too extreme. 
 
 I don't know if everything is gonna be super practical but I hope you'll find it entertaining anyway.
 
@@ -340,7 +340,7 @@ class ContextManager:
     # post yield
     def __exit__():
         """ the implementation for this function kinda has to be somewhat convoluted
-        and handle various edge cases. so we'll just implement the very bare bones"""
+        and handle various edge cases. so we'll just skip it for now"""
         
 ```
 Afterwards we just need a function that'll wrap the class, conveniently with `functools.wraps`, simply as-
@@ -381,11 +381,13 @@ with tempdir as tmp:
 
 The contextmanager wrapper acts as an abstraction to put the pieces together behind the scenes and give us the bare bones of what we want to be dealing with,and a very elegant at that, if you ask me. 
 
+This is not actually a new concept, it's precisely the way `contextlib.contextmanager` function works, albeit more complex as it handles several more edge cases than we discussed.
+
 Two key takeaways:
 1. We can make cool context managers easily with `@contextmannager`.
 2. And this is my favorite- we've exemplified a whole different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use.There is no iterating over some sequence/ messing with concurrency or anything like that here. The generator merely acts like a mediator between entering to exiting.
 
-This is not actually a new idea, it's precisely the way `contextlib.contextmanager` function works, albeit more complex as it handles several more edge cases than we discussed.
+
 
 
 to be continued?
