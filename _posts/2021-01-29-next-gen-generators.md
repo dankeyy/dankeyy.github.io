@@ -22,11 +22,11 @@ That being said, there's a lot more to them than meets the eye and you could do 
 
 You need some basic understanding of generators, maybe some decorators and higher order functions, but not something too extreme. 
 
-I will not claim any of the approaches I'll introduce here will be the best solution to the problem represented, but either way I hope you'll find it entertaining.
+I will not claim any of the generator-guided approaches I'll introduce here will be the best solution to the problem presented, but either way I hope you'll find it entertaining/ discussion worthy.
 
 
 &nbsp;
-# a look inside
+# A Look Inside
 
 Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
 
@@ -145,7 +145,7 @@ Overall pretty neat feature.
 
 &nbsp;
 
-# generator's lost brother, the coroutine
+# Generator's Lost Brother, the Coroutine
 ##### not the async one
 Introduced in [PEP-342](https://www.python.org/dev/peps/pep-0342/), coroutines are somewhat of an obscure feature of python, more often than not, discarded on tutorials covering generators.
 And that's a shame, because useful or unuseful as you'll find it, it's kind of a cool concept.
@@ -161,7 +161,7 @@ def f():
     print(f"I received {x}!")
 ```
 
-Kinda weird in a glance, like what is the yield doing on a right side of an assignment?
+Kinda weird in a glance, what is the yield doing on a right side of an assignment?
 
 I said a coroutine would take a values in. So what we'll do here is send a value through the yield placing it in x. The way we're going to do that is by the `send` method (provided by the beloved pep-342).
 
@@ -173,11 +173,11 @@ listening...
 I received a greeting!
 # followed by a nasty StopIteration error
 ```
-The send method accepts the argument and sends it to the coroutine then advances to the next yield statement. If there is none, a StopIteration error will be raised.
+The send method accepts the argument, sends it to the coroutine, then advances to the next yield statement. If there is none, a StopIteration error will be raised.
 
 You could also send a value to a regular generator, but the value you get back would just be the thing it yields.
 
-Note that it's recommended to `.close()` the coroutine after you're done (though the gc will probably handle it).
+It's recommended to `.close()` the coroutine after you're done (though the gc will probably handle it).
 
 Another side-note because it was introduced in the same pep discussed and may be relevant later- you can throw or in a way inject an exception as if it was raised inside the coroutine. 
 Meaning we could `x.throw(RunTimeError, "something's gone wrong")` for example and it'd behave as if the error originated from the suspension point at the yield statement
@@ -381,13 +381,11 @@ with tempdir as tmp:
 
 The contextmanager wrapper acts as an abstraction to put the pieces together behind the scenes and give us the bare bones of what we want to be dealing with,and a very elegant at that, if you ask me. 
 
-This is not actually a new concept, it's precisely the way `contextlib.contextmanager` function works, albeit more complex as it handles several more edge cases than we discussed.
+This is not actually a new concept, it's precisely the way `contextlib.contextmanager` function works, albeit the actual implementation is more complex as it handles several more edge cases than we discussed. 
+
 
 Two key takeaways:
 1. We can make cool context managers easily with `@contextmannager`.
-2. And this is my favorite- we've exemplified a whole different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use.There is no iterating over some sequence/ messing with concurrency or anything like that here. The generator merely acts like a mediator between entering to exiting.
+2. And this is my favorite- we've exemplified a completely different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting. 
 
-
-
-
-to be continued?
+That's probably not all. To be left as an open ended question or perhaps as an exercise for the reader- what more can you do? What else could you implement, taking advantage of generators?
