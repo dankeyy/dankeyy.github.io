@@ -14,21 +14,21 @@ permalink: "next-gen-generators"
 ___
 &nbsp;
 # Quick Intro & Motivation
-One of python's best features is, in my opinion, generator. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
+One of python's best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
 
-That being said, there's a lot more to them than meets the eye. You could do a lot more than to just iterate and collect data.
+That being said, there's a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.
 
- In this article I will explore some lesser known, (/used even) capabilities of generators in CPython. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.
+ In this article I will explore some less discussed capabilities of generators in CPython. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.
 
-Requires basic understanding of generators and common use cases, maybe some decorators and higher order functions, but not something too extreme. 
+You need some basic understanding of generators, maybe some decorators and higher order functions, but not something too extreme. 
 
-I don't know if everything is gonna be super practical but I hope you'll find it entertaining anyway.
+I will not claim any of the approaches I'll introduce here will be the best solution to the problem represented, but either way I hope you'll find it entertaining.
 
 
 &nbsp;
 # a look inside
 
-Before we continue, it's good to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
+Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
 
 > _An `iterable` is any Python object capable of returning its members one at a time, permitting it to be iterated over in a for-loop. Familiar examples of iterables include lists, tuples, and strings - any such sequence can be iterated over in a for-loop._
 
