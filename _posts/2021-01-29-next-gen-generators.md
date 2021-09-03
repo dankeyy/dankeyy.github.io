@@ -276,7 +276,7 @@ ___
 &nbsp;
 ## **Cutting a Function in Half**
 
-If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- the can hold state. you could pass control to a generator function and it would halt until you actively advance it further.
+If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- they can hold state. You could pass control to a generator function and it would halt until you actively advance it further.
 
 How does this apply?
 
@@ -292,9 +292,9 @@ you open a socket -> you close a socket
 
 etc.
 
-You may guess where I'm going with this - context managers, "the thing that relieves you the worries of closing stuff after you finish, the `with block`".
+You may guess where I'm going with this - context managers, "the thing that relieves you the worries of closing stuff after you finish, the `with` block".
 
-That can be implemented as a class with the dunder methods `__enter__` and `__exit__`. Let's say for example we want to create a temp directory, meaning we create a new folder, do some stuff in it, then deleting it. An implementation of that could go like this:
+Such context manager can be implemented as a class with the dunder methods `__enter__` and `__exit__`. Let's say for example we want to create a temp directory, meaning we create a new folder, do some stuff in it, then deleting it. An implementation of that could go like this:
 
 ```py
 import tempfile
@@ -324,6 +324,10 @@ We start by creating a class that entails the underlying `__enter__` and `__exit
 ```py
 class ContextManager:
 
+    def __init__(self, func, args, kwds):
+        self.gen = func(*args, **kwds)
+        self.func, self.args, self.kwds = func, args, kwds
+
     # pre yield
     def __enter__():
         try: 
@@ -335,13 +339,13 @@ class ContextManager:
     def __exit__(self, typ, value, traceback):
         if typ is None:
             try:
-                next(self.gen)
+                next(self.gen) # we need to take care of the case where the function would have more than one yield
             except StopIteration:
                 return False
             else:
-                raise RuntimeError("generator didn't stop")
+                raise RunTimeError("generator didn't stop")
         else:
-            ... # surpress all kinds of edge case Errors
+            ... # suppress all kinds of edge case Errors
         """ the implementation for this function has to be somewhat convoluted and handle various edge cases. 
         So we'll just stick with that for now because it's not our main focus here"""
         
@@ -377,14 +381,14 @@ Such that it tries to yield, and if an error was suppressed or not, we remove th
 of course we can later use this temp folder as:
 
 ```py
-with tempdir as tmp:
+with tempdir() as tmp:
     ... # messing with stuff inside the directory
 ```
 
 
-The contextmanager wrapper acts as an abstraction to put the pieces together behind the scenes and give us the bare bones of what we want to be dealing with,and a very elegant at that, if you ask me. 
+The contextmanager wrapper acts as an abstraction whose job is to put the pieces together behind the scenes and to give us the bare bones of what we want to be dealing with.
 
-This is not actually a new concept, it's precisely the way `contextlib.contextmanager` function works, albeit the actual implementation is more complex as it handles several more edge cases than we discussed. 
+This is not actually a new concept, it's precisely the way `contextlib.contextmanager` function works, albeit the actual implementation is more complex as it handles several more edge cases than we discussed, see [here](https://github.com/python/cpython/blob/main/Lib/contextlib.py#L139).
 
 
 Two key takeaways:
