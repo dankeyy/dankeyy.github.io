@@ -1,129 +1,385 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-30T15:57:16+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">dankey.blog</title><subtitle>A dank blog about programming and stuff.</subtitle><entry><title type="html">next(generators)</title><link href="http://localhost:4000/next-gen-generators" rel="alternate" type="text/html" title="next(generators)" /><published>2021-01-29T00:00:00+02:00</published><updated>2021-01-29T00:00:00+02:00</updated><id>http://localhost:4000/next-gen-generators</id><content type="html" xml:base="http://localhost:4000/next-gen-generators">&lt;h2 id=&quot;table-of-contents--can-add-some-more-info-to-intro-look-at-the-description-of-dabeez-lecture&quot;&gt;Table of Contents ## can add some more info to intro. look at the description of dabeez lecture&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-09-02T20:39:04+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">dankey.blog</title><subtitle>A dank blog about programming and stuff.</subtitle><entry><title type="html">next(generators)</title><link href="http://localhost:4000/next-gen-generators" rel="alternate" type="text/html" title="next(generators)" /><published>2021-01-29T00:00:00+02:00</published><updated>2021-01-29T00:00:00+02:00</updated><id>http://localhost:4000/next-gen-generators</id><content type="html" xml:base="http://localhost:4000/next-gen-generators">&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
 &lt;ul&gt;
-  &lt;li&gt;Introduction&lt;/li&gt;
-  &lt;li&gt;Quick Recap&lt;/li&gt;
-  &lt;li&gt;subroutines&lt;/li&gt;
-  &lt;li&gt;Data pipelines&lt;/li&gt;
+  &lt;li&gt;Into&lt;/li&gt;
   &lt;li&gt;yield and return from the same function&lt;/li&gt;
   &lt;li&gt;coroutines, and not the async ones&lt;/li&gt;
-  &lt;li&gt;coexistence of generators and coroutines #remember to talk about yield (yield). irc chat in tryhards/ircchats/yieldyield.md&lt;/li&gt;
-  &lt;li&gt;yield as a state holder&lt;/li&gt;
+  &lt;li&gt;A yield yield conundrum&lt;/li&gt;
   &lt;li&gt;yield as a pair of scissors&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;hr /&gt;
 &lt;p&gt; &lt;/p&gt;
-&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
-&lt;p&gt;This is an article about more advanced and/or lesser known abilities and uses of generators in CPython, going gradually from the simplest stuff to not-too-complicated but more-complicated stuff, with a few interesting things to observe along the way.&lt;/p&gt;
+&lt;h1 id=&quot;quick-intro--motivation&quot;&gt;Quick Intro &amp;amp; Motivation&lt;/h1&gt;
+&lt;p&gt;One of python’s best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.&lt;/p&gt;
 
-&lt;p&gt;Hopefully at the end of this you’ll have a better understanding of how generators work and how you can manipulate them at your favor using a few new methods and techniques.&lt;/p&gt;
+&lt;p&gt;That being said, there’s a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.&lt;/p&gt;
 
-&lt;p&gt;Notice this article’s primary focus is mostly on generators but we’ll dive a bit into iteration/ concurrency/ control flow etc while we’re at it.&lt;/p&gt;
+&lt;p&gt;In this article I will explore some less discussed capabilities of generators in CPython. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.&lt;/p&gt;
 
-&lt;p&gt;Not everything here would be super practical but I think exploring this stuff just for the sake of it is enough interesting as it is to justify going down that road.&lt;/p&gt;
+&lt;p&gt;You need some basic understanding of generators, maybe some decorators and higher order functions, but not something too extreme.&lt;/p&gt;
 
-&lt;p&gt;Anyway, this is gonna be a long one, so feel free to divide its reading by chapters or whatever suits you. :D&lt;/p&gt;
-
-&lt;hr /&gt;
+&lt;p&gt;I will not claim any of the generator-guided approaches I’ll introduce here will be the best solution to the problem presented, but either way I hope you’ll find it entertaining/ discussion worthy.&lt;/p&gt;
 
 &lt;p&gt; &lt;/p&gt;
-&lt;h2 id=&quot;recap&quot;&gt;Recap&lt;/h2&gt;
-&lt;h1 id=&quot;part-1&quot;&gt;part 1&lt;/h1&gt;
+&lt;h1 id=&quot;a-look-inside&quot;&gt;A Look Inside&lt;/h1&gt;
 
-&lt;p&gt;So you’ve learned about generators and the yield keyword.&lt;/p&gt;
+&lt;p&gt;Before we continue, it’s nice to know the basics of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iterables&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iterators&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iteration&lt;/code&gt; in general, over sequences and generators alike.&lt;/p&gt;
 
-&lt;p&gt;You probably know how to do neat stuff like&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Maybe you’re a bit more fluent by now so you know stuff like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield from&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Maybe even that function is too much for you, so you’d go for a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;generator expression&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
- &lt;span class=&quot;c1&quot;&gt;# perhaps a quick lambda if n isn't in scope
-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You probably also know how to actually use them&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# I tend to go for a hundred and one next()־s, but you do you
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You might know other ways to manipulate iteration&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You might even know about cool features like unpacking &amp;amp; unpacking a generator&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt; &lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;“ACKTUALLY you can just unpack the range sequence into the print &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;print(*range(2, n, 2))&lt;/code&gt;. what are you a noob?”&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Yeah fine, but that was one smooth recap.&lt;/p&gt;
-
-&lt;p&gt; &lt;/p&gt;
-&lt;h1 id=&quot;part-2&quot;&gt;part 2&lt;/h1&gt;
-&lt;p&gt;Before we play around any further, it’s important to understand the basics of iterators, iterable and iteration in general (over sequences and generators alike).&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;em&gt;An &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iterable&lt;/code&gt; is any Python object capable of returning its members one at a time, permitting it to be iterated over in a for-loop. Familiar examples of iterables include lists, tuples, and strings - any such sequence can be iterated over in a for-loop.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;There are two methods an object can implement to achieve the title &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Iterable&lt;/code&gt;:&lt;/p&gt;
 &lt;ol&gt;
   &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__getitem__&lt;/code&gt; : meaning it enables slicing, indexing and will raise an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IndexError&lt;/code&gt; when you’re no longer trying to access a valid index, sometimes called a sequence.&lt;/p&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__getitem__&lt;/code&gt; : meaning it enables slicing, indexing and will raise an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IndexError&lt;/code&gt; when you’re no longer trying to access a valid index, sometimes called a sequence. Objects that implement such behavior, to name a few, are &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;list&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tuple&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;str&lt;/code&gt;.&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__iter__&lt;/code&gt; meaning you can iterate over its values one after the other.&lt;/p&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__iter__&lt;/code&gt; meaning you can iterate over its values one after the other. Notice this behavior can absolutely coincide with that of an object that already implements &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__getitem__&lt;/code&gt; (as every data structures mentioned above does), &lt;strong&gt;but&lt;/strong&gt; not necessarily, as we see in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;set&lt;/code&gt; data structure that as we know does not allow slicing nor indexing as it is by nature an unordered collection.&lt;/p&gt;
+
+    &lt;p&gt;More importantly for our purposes, this is the behavior of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;generator&lt;/code&gt;. We want it to be lazy, to only do what its supposed to do and yield what it supposed to yield &lt;em&gt;only&lt;/em&gt; at each iteration, occupying an iterative nature and thus implementing an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__iter__&lt;/code&gt; function.&lt;/p&gt;
+
+    &lt;p&gt;By definition we will not be able to tell its next-next value at a glance, we will not be able to take the second half of it without going through the first, as it hasn’t been evaluated yet. So it will not implement &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__getitem__&lt;/code&gt;.&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;In any case, the above Iterable will return an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Iterator&lt;/code&gt;, one that implements a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__next__&lt;/code&gt; method that will return as the next item in line from the Iterable.&lt;/p&gt;
-
-&lt;p&gt;Take a look at the following code:&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+&lt;p&gt;In a slight change of tone let’s take a look at the following code:&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;Seems kinda redundant but hold on. 
-How does the for loop know when to stop?&lt;/p&gt;
+&lt;p&gt;How the for loop knows when to stop?&lt;/p&gt;
 
-&lt;p&gt;Well, you could argue that such thing it possible because you know its length is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;len()&lt;/code&gt;, or rather &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__len__&lt;/code&gt;. Such that you can implement it simply running a loop exactly that &lt;em&gt;len&lt;/em&gt; number of times.&lt;/p&gt;
+&lt;p&gt;Well you could say, if an indexed data structure underlies, length could be received by calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;len()&lt;/code&gt;  so it could just handle the indexing and retrieve the values, translating theoretically to something like&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# do stuff with it[i]
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;And you’d be correct. Sometimes.&lt;/p&gt;
 
-&lt;p&gt;Think for a second about a situation where your Iterable does not implement &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__len__&lt;/code&gt;, how will you know how to stop then?&lt;/p&gt;
+&lt;p&gt;But what about a situation where your Iterable does not implement &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__len__&lt;/code&gt; nor &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__getitem__&lt;/code&gt;, how will you then know when to stop?&lt;/p&gt;
 
-&lt;h5 id=&quot;you-may-already-see-where-im-going-with-this-but-if-you-dont-its-important-that-you-encounter-the-following-implementation--errors-before-further-explorations&quot;&gt;You may already see where I’m going with this, but if you don’t it’s important that you encounter the following implementation &amp;amp; errors before further explorations.&lt;/h5&gt;
+&lt;h5 id=&quot;you-may-already-see-where-im-going-with-this-but-if-you-dont-its-important-that-you-encounter-the-following-implementation--exceptions-before-further-explorations&quot;&gt;You may already see where I’m going with this, but if you don’t it’s important that you encounter the following implementation &amp;amp; exceptions before further explorations.&lt;/h5&gt;
 
-&lt;p&gt;Basically, you’re doing this:&lt;/p&gt;
+&lt;p&gt;Basically you’re doing this:&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;StopIteration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Side note to those not familiar with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iter&lt;/code&gt; - a built-in function that accepts an object and returns an iterator object provided the object implements the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__iter__&lt;/code&gt; method. Plenty of resources and fine docs on this topic can be found online.&lt;/p&gt;
-&lt;/blockquote&gt;
+
+&lt;p&gt;Some things to unpack here:
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iter&lt;/code&gt; - a built-in function that accepts an object and returns a corresponding iterator object, provided by the object’s implementation of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__iter__&lt;/code&gt; method.&lt;/p&gt;
 
 &lt;p&gt;The most important thing to notice here is of course- the StopIteration Error.
-&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;StopIteration&lt;/code&gt; is a built-in Exception that an iterator’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__next__&lt;/code&gt; raises while trying to get the next value when there aren’t none left.&lt;/p&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;StopIteration&lt;/code&gt; is a built-in Exception that an iterator’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__next__&lt;/code&gt; raises while trying to get the next value when there are none left.&lt;/p&gt;
+
+&lt;p&gt;So basically all that’s going on is that the for loop abstracts away the part where you have to manually listen for a StopIteration, gives you back values if they are indeed yielded out, and if not, it just stops. Pretty elegant.&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;Another side note: in latest versions of python, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;StopIteration&lt;/code&gt; exception raised from generator code will be converted to RuntimeError. See &lt;a href=&quot;https://docs.python.org/3/library/exceptions.html#StopIteration&quot;&gt;here&lt;/a&gt; and in the relevant PEPs linked inside.&lt;/p&gt;
+  &lt;p&gt;side note: in latest versions of python, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;StopIteration&lt;/code&gt; exception raised from generator code will be converted to RuntimeError. See &lt;a href=&quot;https://docs.python.org/3/library/exceptions.html#StopIteration&quot;&gt;here&lt;/a&gt; and in the relevant PEPs linked inside.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;Alright I think this is a nice place to stop at, so lets stop and take this thing in a slightly different direction.&lt;/p&gt;
+&lt;p&gt;Now that we got that out of the way, let’s take this in a different direction.&lt;/p&gt;
 
-&lt;p&gt;If that’s roughly the point where you’re at in your understanding of generators and iteration, hold on because there’s more, a lot more.&lt;/p&gt;
+&lt;p&gt;It’s kinda common knowledge that an iter&lt;/p&gt;
 
-&lt;hr /&gt;
-&lt;p&gt; &lt;/p&gt;</content><author><name></name></author><summary type="html">Table of Contents ## can add some more info to intro. look at the description of dabeez lecture Introduction Quick Recap subroutines Data pipelines yield and return from the same function coroutines, and not the async ones coexistence of generators and coroutines #remember to talk about yield (yield). irc chat in tryhards/ircchats/yieldyield.md yield as a state holder yield as a pair of scissors</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2021-01-28T11:16:25+02:00</published><updated>2021-01-28T11:16:25+02:00</updated><id>http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+
+&lt;h1 id=&quot;yield-and-return&quot;&gt;yield AND return?&lt;/h1&gt;
+&lt;p&gt;Usually we make a distinction between generator function’s and regular function’s semantics.&lt;/p&gt;
+
+&lt;p&gt;The distinction being &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt; is the keyword we use to output values back to the caller in a &lt;em&gt;generator function&lt;/em&gt; (in a routine manner) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;return&lt;/code&gt; to give back a value in a &lt;em&gt;regular function&lt;/em&gt;.
+So what if we use both &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;return&lt;/code&gt; in the same function?&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;The following is a property of python 3 only.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s create such a function, try to catch its values and examine its behavior.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;rgen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;...:&lt;/span&gt;     &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;came from yield&quot;&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;...:&lt;/span&gt;     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;came from return&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Now let’s think how we can get those values.
+the yielded value as usual will be obtained by exhausting the generator object.
+as in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;next(rgen())&lt;/code&gt;. but what about the return value?&lt;/p&gt;
+
+&lt;p&gt;So if we take a look at &lt;a href=&quot;https://www.python.org/dev/peps/pep-0255/&quot;&gt;PEP-255&lt;/a&gt;, it says&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;When a return statement is encountered, control proceeds as in any function return, executing the appropriate finally clauses (if any exist). Then a StopIteration exception is raised, signalling that the iterator is exhausted.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Ok so that’s fine, it’ll raise a StopIteration exception signaling we’re done. if that’s true then.. let’s try and catch it.&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rgen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;first we have to make it go to the the yield statement as in any generator:&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;which outputs, as expected:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;came from yield
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;now to the interesting part;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;A StopIteration attribute was added in v3.3, namely &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;value&lt;/code&gt; (&lt;a href=&quot;https://docs.python.org/3/library/exceptions.html#StopIteration&quot;&gt;source&lt;/a&gt;). This attribute will be the holder of our value.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 
+            &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;...:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;StopIteration&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 
+            &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We run it and indeed a the return raised a StopIteration exception which we successfully caught, printing:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;came from return 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So that’s neat. Notice the meaning behind the return in this context, as said in the &lt;a href=&quot;https://www.python.org/dev/peps/pep-0255/#then-why-not-allow-an-expression-on-return-too&quot;&gt;pep&lt;/a&gt;: &lt;em&gt;“I’m done, but I have one final useful value to return too, and this is it”&lt;/em&gt;, with an emphasis on &lt;em&gt;I’m done&lt;/em&gt;, because any yield &lt;strong&gt;after&lt;/strong&gt; the return statement &lt;strong&gt;will not&lt;/strong&gt; be executed.&lt;/p&gt;
+
+&lt;p&gt;Note that this thing, generally speaking, is equivalent to doing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;raise StopIteration(value)&lt;/code&gt;, so the applications are pretty similar.&lt;/p&gt;
+
+&lt;p&gt;If you wish to terminate a generator function early and give an indication as to what happened or some sort of a resulting value, that may be the way to go.&lt;/p&gt;
+
+&lt;p&gt;Though maybe in most implementations of a generator function you’d have a different mechanism for stopping at the right time, I personally have found it useful/ elegant, for instance, in a situation like a recursive generator function in which you wish to early terminate inner iteration.&lt;/p&gt;
+
+&lt;p&gt;Overall pretty neat feature.&lt;/p&gt;
+
+&lt;p&gt; &lt;/p&gt;
+
+&lt;h1 id=&quot;generators-lost-brother-the-coroutine&quot;&gt;Generator’s Lost Brother, the Coroutine&lt;/h1&gt;
+&lt;h5 id=&quot;not-the-async-one&quot;&gt;not the async one&lt;/h5&gt;
+&lt;p&gt;Introduced in &lt;a href=&quot;https://www.python.org/dev/peps/pep-0342/&quot;&gt;PEP-342&lt;/a&gt;, coroutines are somewhat of an obscure feature of python, more often than not, discarded on tutorials covering generators.
+And that’s a shame, because useful or unuseful as you’ll find it, it’s kind of a cool concept.&lt;/p&gt;
+
+&lt;p&gt;In its essence, a coroutine is a generator, using the syntax and nature of the generator, but acts in a somewhat reversed manner. Instead of spitting out values, the coroutine takes them in.&lt;/p&gt;
+
+&lt;p&gt;Let’s clarify with an example:&lt;/p&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;listening...&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sa&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;I received &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Kinda weird in a glance, what is the yield doing on a right side of an assignment?&lt;/p&gt;
+
+&lt;p&gt;I said a coroutine would take a values in. So what we’ll do here is send a value through the yield placing it in x. The way we’re going to do that is by the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;send&lt;/code&gt; method (provided by the beloved pep-342).&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# first we must advance the function to the yield statement
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;listening&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;received&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greeting&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;!&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# followed by a nasty StopIteration error
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The send method accepts the argument, sends it to the coroutine, then advances to the next yield statement. If there is none, a StopIteration error will be raised.&lt;/p&gt;
+
+&lt;p&gt;You could also send a value to a regular generator, but the value you get back would just be the thing it yields.&lt;/p&gt;
+
+&lt;p&gt;It’s recommended to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.close()&lt;/code&gt; the coroutine after you’re done (though the gc will probably handle it).&lt;/p&gt;
+
+&lt;p&gt;Another side-note because it was introduced in the same pep discussed and may be relevant later- you can throw or in a way inject an exception as if it was raised inside the coroutine. 
+Meaning we could &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;x.throw(RunTimeError, &quot;something&apos;s gone wrong&quot;)&lt;/code&gt; for example and it’d behave as if the error originated from the suspension point at the yield statement
+It’s basically just pinpointing an error from outside to the belly of the residing coroutine.&lt;/p&gt;
+
+&lt;p&gt;–&lt;/p&gt;
+
+&lt;p&gt;A common example given on this subject is a grep coroutine to which you send lines and get an answer as to whether or not the query was found on line, but I don’t feel like going through that, you are welcomed to implement such function and show me if you feel like it though. More practical examples such as a scheduler and an echo server can be found &lt;a href=&quot;https://www.python.org/dev/peps/pep-0342/#examples&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.&lt;/p&gt;
+
+&lt;h1 id=&quot;a-yield-yield-conundrum&quot;&gt;A yield yield conundrum&lt;/h1&gt;
+&lt;h2 id=&quot;understanding-by-a-misunderstanding&quot;&gt;understanding by a misunderstanding&lt;/h2&gt;
+&lt;p&gt;When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?&lt;/p&gt;
+
+&lt;p&gt;I remember at the time I’ve read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.&lt;/p&gt;
+
+&lt;p&gt;Perhaps I should have listened, but I think not.&lt;/p&gt;
+
+&lt;p&gt;The idea was extremely simple: make a function what yields the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;(yield)&lt;/code&gt; such that when you send value to the function it will yield it back to you. Basically an echo generator-coroutine.&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;note we have to put the second &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt; in brackets to let the lexer know it’s an expression (we would later send a value to) rather than just the keyword &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt; which will kinda entail we’re trying to yield the yield keyword and result in a syntax error.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Let’s test this out:&lt;/p&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;13&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;13&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;hello&apos;&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Seemingly it only responds to every other message we pass it. What’s going on?&lt;/p&gt;
+
+&lt;p&gt;To make things clearer, I will mention I used ipython in the examples above, in which if the response is None, it just wouldn’t display it.&lt;/p&gt;
+
+&lt;p&gt;So it’s not that it doesn’t respond to every other send, it’s that every other send yields back a None.
+Why?&lt;/p&gt;
+
+&lt;p&gt;So we can begin to understand by taking a look at the disassembly:&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;dis&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dis&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;    &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOAD_CONST&lt;/span&gt;               &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+              &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YIELD_VALUE&lt;/span&gt;
+              &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YIELD_VALUE&lt;/span&gt;
+              &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POP_TOP&lt;/span&gt;
+              &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JUMP_ABSOLUTE&lt;/span&gt;            &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+             &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOAD_CONST&lt;/span&gt;               &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+             &lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RETURN_VALUE&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We thought it’ll be all rainbows and sunshines, we would just send a value to the second yield and the first yield will take it and yield it back to us.
+But as we see, it for some reason first loads the const &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;None&lt;/code&gt; then yields stuff out.&lt;/p&gt;
+
+&lt;p&gt;According to pep-325:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;The yield-statement will be allowed to be used on the right-hand side of an assignment; in that case it is referred to as yield-expression. The value of this yield-expression is None unless send() was called with a non-None argument.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;What’s actually going on is two things:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;The first &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt; yields None, being that the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;(yield)&lt;/code&gt; evaluates to None.&lt;/li&gt;
+  &lt;li&gt;The second yield yields the value sent to the first &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yield&lt;/code&gt;, that being our argument to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;send&lt;/code&gt; method.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To draw the two points together - the first always outputs None and receives some value. The second is always outputting the former value and ignoring input. 
+Remember- yield &lt;em&gt;always&lt;/em&gt; has both input &amp;amp; output, both of which can be None.&lt;/p&gt;
+
+&lt;p&gt;If you think about it, it doesn’t make sense for it to be any other way.  We naively expected it to stop after the first yield, wait for us to send value to the second (yield) and echo back, but.. that’s not really reasonable considering the nature of the generator, just like the pep says “&lt;em&gt;Blocks in Python are not compiled into thunks; rather, yield suspends execution of the generator’s frame.&lt;/em&gt;”.&lt;/p&gt;
+
+&lt;p&gt;Of course it wouldn’t wait for our response, it’s a generator that already took control! the second yield has to have a default value in order for the generator to yield something back to us.&lt;/p&gt;
+
+&lt;p&gt;I spent too much time trying to figure this out on my own when the answer was under my nose in the pep all along just waiting to be read. That being said, I think it was a nice trigger to a- remember to RTFM and b- actually understand how control transfers and the nature of generators &amp;amp; coroutines.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-fix&quot;&gt;A fix&lt;/h2&gt;
+&lt;p&gt;With the understanding we’ve acquired, can we fix it?
+Well yeah, we know by now a coroutine has both an input and an output. So granted we wouldn’t have a cool yield yield but by understanding that the behavior we were looking for was already deeply rooted in the coroutine, we could just do-&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; 
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Making the yield take v as an input and an output interchangeably.&lt;/p&gt;
+
+&lt;h1 id=&quot;yield-as-a-pair-of-scissors&quot;&gt;yield as a pair of scissors&lt;/h1&gt;
+
+&lt;p&gt;If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- the can hold state. you could pass control to a generator function and it would halt until you actively advance it further.&lt;/p&gt;
+
+&lt;p&gt;How does this apply?&lt;/p&gt;
+
+&lt;p&gt;Let’s think about this recurring phenomena-&lt;/p&gt;
+
+&lt;p&gt;you open a file -&amp;gt; you close a file,&lt;/p&gt;
+
+&lt;p&gt;you acquire a lock -&amp;gt; you release a lock,&lt;/p&gt;
+
+&lt;p&gt;you start a timer -&amp;gt; you end a timer,&lt;/p&gt;
+
+&lt;p&gt;you open a socket -&amp;gt; you close a socket&lt;/p&gt;
+
+&lt;p&gt;etc.&lt;/p&gt;
+
+&lt;p&gt;You may guess where I’m going with this - context managers, “the thing that relieves you the worries of closing stuff after you finish, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;with block&lt;/code&gt;”.&lt;/p&gt;
+
+&lt;p&gt;That can be implemented as a class with the dunder methods &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__enter__&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__exit__&lt;/code&gt;. Let’s say for example we want to create a temp directory, meaning we create a new folder, do some stuff in it, then deleting it. An implementation of that could go like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;tempfile&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;shutil&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Tempdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__enter__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirname&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tempfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mktemp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirname&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__exit__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rmtree&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;And that’s great and all, but pretty verbose to implement for every context manager we need.&lt;/p&gt;
+
+&lt;p&gt;What if we abstract out the class and provide a simpler interface for creating those sorts of context managers?&lt;/p&gt;
+
+&lt;h2 id=&quot;game-plan&quot;&gt;&lt;strong&gt;Game plan&lt;/strong&gt;:&lt;/h2&gt;
+&lt;p&gt;We’re going to base this thing on a generator.
+We know a yield statement can in a way pause a function, we can think of it as cutting it to two pieces- what comes before, and what comes after. As mentioned before &lt;em&gt;it would halt until you actively advance it further&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;That’s the goal here.
+We’re gonna make an interface that wraps around a generator function in which we’re doing stuff at the entry point (could be opening a file, starting a timer, whatever), then yielding after it to mark the halfpoint, after which we merely clean up (closing something, ending a timer, etc), with as little boilerplate as possible.&lt;/p&gt;
+
+&lt;p&gt;We start by creating a class that entails the underlying &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__enter__&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__exit__&lt;/code&gt; methods on the generator object we would later cover with a wrapper function.&lt;/p&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ContextManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# pre yield
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__enter__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 
+            &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# to advance it to the yield statement
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;StopIteration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RunTimeError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;didn&apos;t yield&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    &lt;span class=&quot;c1&quot;&gt;# post yield
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__exit__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot; the implementation for this function kinda has to be somewhat convoluted
+        and handle various edge cases. so we&apos;ll just skip it for now&quot;&quot;&quot;&lt;/span&gt;
+        
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Afterwards we just need a function that’ll wrap the class, conveniently with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;functools.wraps&lt;/code&gt;, simply as-&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;contextmanager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wraps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ContextManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helper&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;if you’re not familiar with the above sort of implementation i recommend googling on higher order functions &amp;amp; decorators in python&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;After we got that we can use contextmanager as a decorator and implement contextmanagers simply as functions wrapped by it.&lt;/p&gt;
+
+&lt;p&gt;We can implement the Tempdir we wrote earlier as the following:&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contextmanager&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;tempdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tmpdir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tempfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mktemp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmpdir&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;finally&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rmtree&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Such that it tries to yield, and if an error was suppressed or not, we remove the tmpdir we created earlier.&lt;/p&gt;
+
+&lt;p&gt;of course we can later use this temp folder as:&lt;/p&gt;
+
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tempdir&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# messing with stuff inside the directory
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The contextmanager wrapper acts as an abstraction to put the pieces together behind the scenes and give us the bare bones of what we want to be dealing with,and a very elegant at that, if you ask me.&lt;/p&gt;
+
+&lt;p&gt;This is not actually a new concept, it’s precisely the way &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;contextlib.contextmanager&lt;/code&gt; function works, albeit the actual implementation is more complex as it handles several more edge cases than we discussed.&lt;/p&gt;
+
+&lt;p&gt;Two key takeaways:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;We can make cool context managers easily with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@contextmannager&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;And this is my favorite- we’ve exemplified a completely different kind of use case for generators. We’re using the yield to do something that isn’t at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That’s probably not all. To be left as an open ended question or perhaps as an exercise for the reader- what more can you do? What else could you implement, taking advantage of generators?&lt;/p&gt;</content><author><name></name></author><summary type="html">Table of Contents Into yield and return from the same function coroutines, and not the async ones A yield yield conundrum yield as a pair of scissors</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2021-01-28T11:16:25+02:00</published><updated>2021-01-28T11:16:25+02:00</updated><id>http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2021/01/28/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
 
 &lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
 
@@ -136,7 +392,7 @@ How does the for loop know when to stop?&lt;/p&gt;
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
   &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="update" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry></feed>

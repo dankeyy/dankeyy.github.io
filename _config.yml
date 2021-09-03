@@ -34,13 +34,12 @@ plugins:
 
 
 defaults: 
-  -
-    scope:
+  - scope:
       path: ""
       path: "posts"
     values: 
-        layout: "post"
-        author: "dankey"
+      layout: "post"
+      author: "dankey"
 
 
 # Exclude from processing.

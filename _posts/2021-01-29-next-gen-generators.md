@@ -6,8 +6,10 @@ permalink: "next-gen-generators"
 
 # Table of Contents
 * Into
+* Under the covers
+  * A Step Deeper
 * yield and return from the same function
-* coroutines, and not the async ones
+* coroutines, but as disguised generators
 * A yield yield conundrum
 * yield as a pair of scissors
 
@@ -26,7 +28,7 @@ I will not claim any of the generator-guided approaches I'll introduce here will
 
 
 &nbsp;
-# A Look Inside
+# A Look Under the Covers
 
 Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
 
@@ -56,16 +58,10 @@ for i in range(len(it)): ... # do stuff with it[i]
 
 But what about a situation where your Iterable does not implement `__len__` nor `__getitem__`, how will you then know when to stop?
 
-##### You may already see where I'm going with this, but if you don't it's important that you encounter the following implementation & exceptions before further explorations.
+If we actualy reveal what's under the cover-
 
-Basically you're doing this:
-```python
-x = iter(it)
-while True:
-    try: next(x)
-    except StopIteration: break
+![underthecover](memes/genunderthecovers.png)
 
-```
 
 Some things to unpack here:
 `iter` - a built-in function that accepts an object and returns a corresponding iterator object, provided by the object's implementation of the `__iter__` method.
@@ -73,14 +69,12 @@ Some things to unpack here:
 The most important thing to notice here is of course- the StopIteration Error.
 `StopIteration` is a built-in Exception that an iterator's `__next__` raises while trying to get the next value when there are none left.
 
-So basically all that's going on is that the for loop abstracts away the part where you have to manually listen for a StopIteration, gives you back values if they are indeed yielded out, and if not, it just stops. Pretty elegant.
+So basically all that's going on is that the for loop abstracts away the listening for a StopIteration error part, and gives you back values if they are indeed yielded out, and if not, it elegantly just stops.
 
 
 > side note: in latest versions of python, `StopIteration` exception raised from generator code will be converted to RuntimeError. See [here](https://docs.python.org/3/library/exceptions.html#StopIteration) and in the relevant PEPs linked inside.
 
-Now that we got that out of the way, let's take this in a different direction.
 
-It's kinda common knowledge that an iter
 
 &nbsp;
 
@@ -190,7 +184,7 @@ A common example given on this subject is a grep coroutine to which you send lin
 What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.
 
 # A yield yield conundrum
-## understanding by a misunderstanding
+### understanding by a misunderstanding  
 When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
 
 I remember at the time I've read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.
@@ -280,7 +274,7 @@ def f():
 Making the yield take v as an input and an output interchangeably.
 
 
-# yield as a pair of scissors
+# Cutting a Function
 
 If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- the can hold state. you could pass control to a generator function and it would halt until you actively advance it further.
 
@@ -387,5 +381,7 @@ This is not actually a new concept, it's precisely the way `contextlib.contextma
 Two key takeaways:
 1. We can make cool context managers easily with `@contextmannager`.
 2. And this is my favorite- we've exemplified a completely different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting. 
+
+
 
 That's probably not all. To be left as an open ended question or perhaps as an exercise for the reader- what more can you do? What else could you implement, taking advantage of generators?
