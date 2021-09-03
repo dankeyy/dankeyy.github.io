@@ -58,8 +58,7 @@ for i in range(len(it)): ... # do stuff with it[i]
 But what about a situation where your Iterable does not implement `__len__` nor `__getitem__`, how will you then know when to stop?
 
 If we actualy reveal what's under the cover-
-
-![underthecover](/_posts/memes/genunderthecovers.PNG)
+<img src="_posts/memes/genunderthecovers.PNG" alt="hi" class="inline"/>
 
 
 Some things to unpack here:
