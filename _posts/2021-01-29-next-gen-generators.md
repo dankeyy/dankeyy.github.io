@@ -38,7 +38,7 @@ There are two methods an object can implement to achieve the title `Iterable`:
 
 2. `__iter__` meaning you can iterate over its values one after the other. Notice this behavior can absolutely coincide with that of an object that already implements `__getitem__` (as every data structures mentioned above does), **but** not necessarily, as we see in the `set` data structure that as we know does not allow slicing nor indexing as it is by nature an unordered collection. 
    
-   More importantly for our purposes, this is the behavior of a `generator`. We want it to be lazy, to only do what its supposed to do and yield what it supposed to yield _only_ at each iteration, occupying an iterative nature and thus implementing an `__iter__` function.
+   More importantly for our purposes, this is the behavior of a `generator`. We want it to be lazy, to only do what it's supposed to do and yield what it supposed to yield _only_ at each iteration, occupying an iterative nature and thus implementing an `__iter__` function.
    
    By definition we will not be able to tell its next-next value at a glance, we will not be able to take the second half of it without going through the first, as it hasn't been evaluated yet. So it will not implement `__getitem__`.
 
@@ -161,7 +161,7 @@ I said a coroutine would take a values in. So what we'll do here is send a value
 >>> x = f()
 >>> next(x) # first we must advance the function to the yield statement
 listening...
->>> x.send()
+>>> x.send('a greeting')
 I received a greeting!
 # followed by a nasty StopIteration error
 ```
