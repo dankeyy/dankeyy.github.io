@@ -343,7 +343,8 @@ class ContextManager:
             except StopIteration:
                 return
             else:
-                raise RunTimeError("generator didn't stop") # this whole construction can seem complicated but we need to let the user know it's misusing the class and the generator provided doesn't have a single median yield point.
+                raise RunTimeError("generator didn't stop") # gen didn't stop because it keeps on yielding
+                # this whole construction can seem complicated but we need to let the user know it's misusing the class and the generator provided doesn't have a single median yield point.
         else:
             ...
         """ The implementation for this function has to be somewhat convoluted and handle various edge cases. 
