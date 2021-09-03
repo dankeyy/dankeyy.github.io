@@ -4,7 +4,7 @@ title: "next(generators)"
 permalink: "next-gen-generators"
 ---
 
-# Table of Contents
+# **Table of Contents**
 * Into
 * Under the covers
 * yield and return
@@ -14,7 +14,7 @@ permalink: "next-gen-generators"
 
 ___
 &nbsp;
-## **Quick Intro & Motivation**
+# **Quick Intro & Motivation**
 One of python's best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
 
 That being said, there's a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.
@@ -25,9 +25,9 @@ You need some basic understanding of generators, maybe some decorators and highe
 
 I will not claim any of the generator-guided approaches I'll introduce here will be the best solution to the problem presented, but either way I hope you'll find it entertaining/ discussion worthy.
 
-
+___
 &nbsp;
-## **A Look Under the Covers**
+# **A Look Under the Covers**
 
 Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
 
@@ -75,9 +75,9 @@ So basically all that's going on is that the for loop abstracts away the listeni
 
 
 
+___
 &nbsp;
-
-## **yield AND return?**
+# **yield AND return?**
 Usually we make a distinction between generator function's and regular function's semantics.
 
 The distinction being `yield` is the keyword we use to output values back to the caller in a _generator function_ (in a routine manner) and `return` to give back a value in a _regular function_.
@@ -136,9 +136,9 @@ Though maybe in most implementations of a generator function you'd have a differ
 
 Overall pretty neat feature.
 
+___
 &nbsp;
-
-## **Generator's Lost Brother, the Coroutine**
+# **Generator's Lost Brother, the Coroutine**
 ##### not the async one
 Introduced in [PEP-342](https://www.python.org/dev/peps/pep-0342/), coroutines are somewhat of an obscure feature of python, more often than not, discarded on tutorials covering generators.
 And that's a shame, because useful or unuseful as you'll find it, it's kind of a cool concept.
@@ -182,7 +182,7 @@ A common example given on this subject is a grep coroutine to which you send lin
 
 What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.
 
-## **A yield yield conundrum**
+# **A yield yield conundrum**
 ##### understanding by a misunderstanding  
 When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
 
@@ -273,6 +273,8 @@ def f():
 Making the yield take v as an input and an output interchangeably.
 
 
+___
+&nbsp;
 ## **Cutting a Function in Half**
 
 If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- the can hold state. you could pass control to a generator function and it would halt until you actively advance it further.
