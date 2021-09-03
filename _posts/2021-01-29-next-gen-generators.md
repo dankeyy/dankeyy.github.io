@@ -59,7 +59,7 @@ But what about a situation where your Iterable does not implement `__len__` nor 
 
 If we actualy reveal what's under the cover-
 
-![underthecover](memes/genunderthecovers.png)
+![underthecover](memes/genunderthecovers.PNG)
 
 
 Some things to unpack here:
