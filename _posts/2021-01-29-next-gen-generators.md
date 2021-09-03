@@ -326,7 +326,7 @@ class ContextManager:
 
     def __init__(self, func, args, kwds):
         self.gen = func(*args, **kwds)
-        self.func, self.args, self.kwds = func, args, kwds
+        self.args, self.kwds = args, kwds
 
     # pre yield
     def __enter__():
@@ -338,15 +338,15 @@ class ContextManager:
     # post yield
     def __exit__(self, typ, value, traceback):
         if typ is None:
-            try:
-                next(self.gen) # we need to take care of the case where the function would have more than one yield
+            try: # we need to take care of the case where the function would have more than one yield point
+                next(self.gen) 
             except StopIteration:
-                return False
+                return
             else:
-                raise RunTimeError("generator didn't stop")
+                raise RunTimeError("generator didn't stop") # this whole construction can seem complicated but we need to let the user know it's misusing the class and the generator provided doesn't have a single median yield point.
         else:
-            ... # suppress all kinds of edge case Errors
-        """ the implementation for this function has to be somewhat convoluted and handle various edge cases. 
+            ...
+        """ The implementation for this function has to be somewhat convoluted and handle various edge cases. 
         So we'll just stick with that for now because it's not our main focus here"""
         
 ```
