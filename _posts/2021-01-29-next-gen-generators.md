@@ -182,7 +182,7 @@ A common example given on this subject is a grep coroutine to which you send lin
 
 What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.
 
-# **A yield yield conundrum**
+# A yield yield conundrum
 ##### understanding by a misunderstanding  
 When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
 
@@ -384,5 +384,4 @@ Two key takeaways:
 2. And this is my favorite- we've exemplified a completely different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting. 
 
 
-
-That's probably not all. To be left as an open ended question or perhaps as an exercise for the reader- what more can you do? What else could you implement, taking advantage of generators?
+I think that's all today. If you have more generator relared topics you think would be nice to cover, contact me and maybe I'll extend the post/ write about it another time :)
