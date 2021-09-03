@@ -7,14 +7,14 @@ permalink: "next-gen-generators"
 # Table of Contents
 * Into
 * Under the covers
-* yield and return from the same function
-* coroutines, but as disguised generators
+* yield and return
+* coroutines disguised as generators
 * A yield yield conundrum
-* Slicing functions with yield
+* slicing functions with yield
 
 ___
 &nbsp;
-# Quick Intro & Motivation
+### Quick Intro & Motivation
 One of python's best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
 
 That being said, there's a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.
@@ -27,7 +27,7 @@ I will not claim any of the generator-guided approaches I'll introduce here will
 
 
 &nbsp;
-# A Look Under the Covers
+### A Look Under the Covers
 
 Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
 
@@ -182,8 +182,8 @@ A common example given on this subject is a grep coroutine to which you send lin
 
 What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.
 
-# A yield yield conundrum
-### understanding by a misunderstanding  
+### A yield yield conundrum
+# understanding by a misunderstanding  
 When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
 
 I remember at the time I've read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.
@@ -273,7 +273,7 @@ def f():
 Making the yield take v as an input and an output interchangeably.
 
 
-# Cutting a Function
+## Cutting a Function in Half
 
 If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- the can hold state. you could pass control to a generator function and it would halt until you actively advance it further.
 
@@ -312,7 +312,7 @@ And that's great and all, but pretty verbose to implement for every context mana
 
 What if we abstract out the class and provide a simpler interface for creating those sorts of context managers?
 
-### **Game plan**:
+# **Game plan**:
 We're going to base this thing on a generator.
 We know a yield statement can in a way pause a function, we can think of it as cutting it to two pieces- what comes before, and what comes after. As mentioned before _it would halt until you actively advance it further_. 
 
