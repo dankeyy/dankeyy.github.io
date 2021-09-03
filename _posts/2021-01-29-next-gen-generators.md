@@ -332,9 +332,18 @@ class ContextManager:
             raise RunTimeError("didn't yield")
     
     # post yield
-    def __exit__():
-        """ the implementation for this function kinda has to be somewhat convoluted
-        and handle various edge cases. so we'll just skip it for now"""
+    def __exit__(self, typ, value, traceback):
+        if typ is None:
+            try:
+                next(self.gen)
+            except StopIteration:
+                return False
+            else:
+                raise RuntimeError("generator didn't stop")
+        else:
+            ... # surpress all kinds of edge case Errors
+        """ the implementation for this function has to be somewhat convoluted and handle various edge cases. 
+        So we'll just stick with that for now because it's not our main focus here"""
         
 ```
 Afterwards we just need a function that'll wrap the class, conveniently with `functools.wraps`, simply as-
