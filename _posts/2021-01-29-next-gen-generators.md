@@ -265,7 +265,8 @@ With the understanding we've acquired, can we fix it?
 Well yeah, we know by now a coroutine has both an input and an output. So granted we wouldn't have a cool yield yield but by understanding that the behavior we were looking for was already deeply rooted in the coroutine, we could just do-
 
 ```py
-def f(): 
+def f():
+    v = None
     while True:
         v = yield v
 ```
