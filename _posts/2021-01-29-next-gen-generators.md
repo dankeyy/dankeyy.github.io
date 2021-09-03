@@ -183,7 +183,7 @@ What I want to discuss is a simple misguided bad idea I had which has let me to 
 
 # A yield yield conundrum
 ##### understanding by a misunderstanding  
-When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
+When I first encountered the concept of generator-coroutine I had an idea, what if we made a function to be a coroutine and a generator at the same time?
 
 I remember at the time I've read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.
 
@@ -193,7 +193,7 @@ The idea was extremely simple: make a function what yields the `(yield)` such th
 ```python
 def f():
     while True:
-     yield (yield)
+        yield (yield)
 ```
  > note we have to put the second `yield` in brackets to let the lexer know it's an expression (we would later send a value to) rather than just the keyword `yield` which will kinda entail we're trying to yield the yield keyword and result in a syntax error.
 
