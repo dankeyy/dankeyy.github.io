@@ -384,4 +384,5 @@ Two key takeaways:
 2. And this is my favorite- we've exemplified a completely different kind of use case for generators. We're using the yield to do something that isn't at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting. 
 
 ___
-I think that's all for now. If you have more generator relared topics you think would be nice to cover, contact me and maybe I'll extend the post/ write about it another time :)
+&nbsp;
+I think that's all for now. If you have more generator related topics you think would be nice to cover, contact me and maybe I'll extend the post/ write about it another time :)
