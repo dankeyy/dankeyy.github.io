@@ -7,11 +7,10 @@ permalink: "next-gen-generators"
 # Table of Contents
 * Into
 * Under the covers
-  * A Step Deeper
 * yield and return from the same function
 * coroutines, but as disguised generators
 * A yield yield conundrum
-* yield as a pair of scissors
+* Slicing functions with yield
 
 ___
 &nbsp;
@@ -313,7 +312,7 @@ And that's great and all, but pretty verbose to implement for every context mana
 
 What if we abstract out the class and provide a simpler interface for creating those sorts of context managers?
 
-## **Game plan**:
+### **Game plan**:
 We're going to base this thing on a generator.
 We know a yield statement can in a way pause a function, we can think of it as cutting it to two pieces- what comes before, and what comes after. As mentioned before _it would halt until you actively advance it further_. 
 
