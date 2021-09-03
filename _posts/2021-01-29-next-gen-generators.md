@@ -178,12 +178,12 @@ It's basically just pinpointing an error from outside to the belly of the residi
 
 --
 
-A common example given on this subject is a grep coroutine to which you send lines and get an answer as to whether or not the query was found on line, but I don't feel like going through that, you are welcomed to implement such function and show me if you feel like it though. More practical examples such as a scheduler and an echo server can be found [here](https://www.python.org/dev/peps/pep-0342/#examples).
+A common example given on this subject is a grep coroutine to which you send lines and get an answer as to whether or not the query was found in the given line, but I don't feel like going through that, you can implement and send it to me though if you feel like it. More practical examples such as a scheduler and an echo server can be found [here](https://www.python.org/dev/peps/pep-0342/#examples).
 
 What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.
 
 ### A yield yield conundrum
-# understanding by a misunderstanding  
+##### understanding by a misunderstanding  
 When I first encountered the concept of generator-coroutine I had an idea, what if we had make a function to be a coroutine and a generator at the same time?
 
 I remember at the time I've read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.
