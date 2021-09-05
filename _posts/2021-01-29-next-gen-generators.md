@@ -29,16 +29,16 @@ ___
 &nbsp;
 # **A Look Under the Covers**
 
-Before we continue, it's nice to know the basics of `iterables`, `iterators` and `iteration` in general, over sequences and generators alike. 
+Before we continue, it's nice to know the basics of `iterables`, `iterators`, and `iteration` in general, over sequences and generators alike. 
 
 > _An `iterable` is any Python object capable of returning its members one at a time, permitting it to be iterated over in a for-loop. Familiar examples of iterables include lists, tuples, and strings - any such sequence can be iterated over in a for-loop._
 
 There are two methods an object can implement to achieve the title `Iterable`:
 1.  `__getitem__` : meaning it enables slicing, indexing and will raise an `IndexError` when you're no longer trying to access a valid index, sometimes called a sequence. Objects that implement such behavior, to name a few, are `list`, `tuple`, `str`.
 
-2. `__iter__` meaning you can iterate over its values one after the other. Notice this behavior can absolutely coincide with that of an object that already implements `__getitem__` (as every data structures mentioned above does), **but** not necessarily, as we see in the `set` data structure that as we know does not allow slicing nor indexing as it is by nature an unordered collection. 
+2. `__iter__` meaning you can iterate over its values one after the other. Notice this behavior can absolutely coincide with that of an object that already implements `__getitem__` (as every data structure mentioned above does), **but** not necessarily, as we see in the `set` data structure that as we know does not allow slicing nor indexing as it is by nature an unordered collection. 
    
-   More importantly for our purposes, this is the behavior of a `generator`. We want it to be lazy, to only do what it's supposed to do and yield what it supposed to yield _only_ at each iteration, occupying an iterative nature and thus implementing an `__iter__` function.
+   More importantly for our purposes, this is the behavior of a `generator`. We want it to be lazy, to only do what it's supposed to do and yield what it's supposed to yield _only_ at each iteration, occupying an iterative nature and thus implementing an `__iter__` function.
    
    By definition we will not be able to tell its next-next value at a glance, we will not be able to take the second half of it without going through the first, as it hasn't been evaluated yet. So it will not implement `__getitem__`.
 
