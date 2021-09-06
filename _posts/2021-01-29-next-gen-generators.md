@@ -155,7 +155,7 @@ def f():
 
 Kinda weird in a glance, what is the yield doing on a right side of an assignment?
 
-I said a coroutine would take a values in. So what we'll do here is send a value through the yield placing it in x. The way we're going to do that is by the `send` method (provided by the beloved pep-342).
+I said a coroutine would take a value in. So what we'll do here is send a value through the yield placing it in x. The way we're going to do that is by the `send` method (provided by the beloved pep-342).
 
 ```py
 >>> x = f()
