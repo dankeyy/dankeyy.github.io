@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on dankey@blog$</title><link>/posts/</link><description>Recent content in Posts on dankey@blog$</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 29 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>next(generators)</title><link>/posts/next-generators/</link><pubDate>Fri, 29 Jan 2021 00:00:00 +0000</pubDate><guid>/posts/next-generators/</guid><description>Contents intro under the covers when yield duos with return generator&amp;rsquo;s lost brother a yield yield conundrum slicing functions Quick Intro &amp;amp; Motivation One of python&amp;rsquo;s best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.
+That being said, there&amp;rsquo;s a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.</description><content>&lt;h1 id="contents">&lt;strong>Contents&lt;/strong>&lt;/h1>
+&lt;ul>
+&lt;li>&lt;a href="/posts/next-generators/#quick-intro--motivation">intro&lt;/a>&lt;/li>
+&lt;li>&lt;a href="/posts/next-generators/#under-the-covers">under the covers&lt;/a>&lt;/li>
+&lt;li>&lt;a href="/posts/next-generators/#yield-and-return">when &lt;code>yield&lt;/code> duos with &lt;code>return&lt;/code>&lt;/a>&lt;/li>
+&lt;li>&lt;a href="/posts/next-generators/#generators-lost-brother-the-coroutine">generator&amp;rsquo;s lost brother&lt;/a>&lt;/li>
+&lt;li>&lt;a href="/posts/next-generators/#a-yield-yield-conundrum">a &lt;code>yield yield&lt;/code> conundrum&lt;/a>&lt;/li>
+&lt;li>&lt;a href="/posts/next-generators/#cutting-a-function-in-half">slicing functions&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="quick-intro--motivation">&lt;strong>Quick Intro &amp;amp; Motivation&lt;/strong>&lt;/h1>
+&lt;p>One of python&amp;rsquo;s best features in my opinion is generators. I believe it allows for some pretty concise and expressive code, as well as handing out an ergonomic handle to lazy evaluation when needed.&lt;/p>
+&lt;p>That being said, there&amp;rsquo;s a lot more to them than meets the eye and you could do a lot more with generators than iterating and collecting data.&lt;/p>
+&lt;p>In this article I will explore some less discussed capabilities of generators in CPython. Going from relatively basic stuff over to not-too-complicated but a bit more-complicated stuff.&lt;/p>
+&lt;p>You need some basic understanding of generators, maybe some decorators and higher order functions, but not something too extreme.&lt;/p>
+&lt;p>I will not claim any of the generator-guided approaches I&amp;rsquo;ll introduce here will be the best solution to the problem presented, but either way I hope you&amp;rsquo;ll find it entertaining/ discussion worthy.&lt;/p>
+&lt;h1 id="under-the-covers">&lt;strong>Under the Covers&lt;/strong>&lt;/h1>
+&lt;p>Before we continue, it&amp;rsquo;s nice to know the basics of &lt;code>iterables&lt;/code>, &lt;code>iterators&lt;/code>, and &lt;code>iteration&lt;/code> in general, over sequences and generators alike.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;em>An &lt;code>iterable&lt;/code> is any Python object capable of returning its members one at a time, permitting it to be iterated over in a for-loop. Familiar examples of iterables include lists, tuples, and strings - any such sequence can be iterated over in a for-loop.&lt;/em>&lt;/p>
+&lt;/blockquote>
+&lt;p>There are two methods an object can implement to achieve the title &lt;code>Iterable&lt;/code>:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;code>__getitem__&lt;/code> : meaning it enables slicing, indexing and will raise an &lt;code>IndexError&lt;/code> when you&amp;rsquo;re no longer trying to access a valid index, sometimes called a sequence. Objects that implement such behavior, to name a few, are &lt;code>list&lt;/code>, &lt;code>tuple&lt;/code>, &lt;code>str&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>__iter__&lt;/code> meaning you can iterate over its values one after the other. Notice this behavior can absolutely coincide with that of an object that already implements &lt;code>__getitem__&lt;/code> (as every data structure mentioned above does), &lt;strong>but&lt;/strong> not necessarily, as we see in the &lt;code>set&lt;/code> data structure that as we know does not allow slicing nor indexing as it is by nature an unordered collection.&lt;/p>
+&lt;p>More importantly for our purposes, this is the behavior of a &lt;code>generator&lt;/code>. We want it to be lazy, to only do what it&amp;rsquo;s supposed to do and yield what it&amp;rsquo;s supposed to yield &lt;em>only&lt;/em> at each iteration, occupying an iterative nature and thus implementing an &lt;code>__iter__&lt;/code> function.&lt;/p>
+&lt;p>By definition we will not be able to tell its next-next value at a glance, we will not be able to take the second half of it without going through the first, as it hasn&amp;rsquo;t been evaluated yet. So it will not implement &lt;code>__getitem__&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>In a slight change of tone let&amp;rsquo;s take a look at the following code:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">for&lt;/span> _ &lt;span style="color:#f92672">in&lt;/span> it:
+&lt;span style="color:#66d9ef">pass&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>How the for loop knows when to stop?&lt;/p>
+&lt;p>Well you could say, if an indexed data structure underlies, length could be received by calling &lt;code>len()&lt;/code> so it could just handle the indexing and retrieve the values, translating theoretically to something like&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(len(it)): &lt;span style="color:#f92672">...&lt;/span> &lt;span style="color:#75715e"># do stuff with it[i]&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>But what about a situation where your Iterable does not implement &lt;code>__len__&lt;/code> nor &lt;code>__getitem__&lt;/code>, how will you then know when to stop?&lt;/p>
+&lt;p>If we actually reveal what&amp;rsquo;s under the cover-
+&lt;img src="/memes/genunderthecovers.png" alt="genunderthecovers">&lt;/p>
+&lt;p>Some things to unpack here:
+&lt;code>iter&lt;/code> - a built-in function that accepts an object and returns a corresponding iterator object, provided by the object&amp;rsquo;s implementation of the &lt;code>__iter__&lt;/code> method.&lt;/p>
+&lt;p>The most important thing to notice here is of course- the StopIteration Error.
+&lt;code>StopIteration&lt;/code> is a built-in Exception that an iterator&amp;rsquo;s &lt;code>__next__&lt;/code> raises while trying to get the next value when there are none left.&lt;/p>
+&lt;p>So basically all that&amp;rsquo;s going on is that the for loop abstracts away the listening for a StopIteration error part, and gives you back values if they are indeed yielded out, and if not, it elegantly just stops.&lt;/p>
+&lt;blockquote>
+&lt;p>side note: in latest versions of python, &lt;code>StopIteration&lt;/code> exception raised from generator code will be converted to RuntimeError. See &lt;a href="https://docs.python.org/3/library/exceptions.html#StopIteration">here&lt;/a> and in the relevant PEPs linked inside.&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="yield-and-return">&lt;strong>yield AND return?&lt;/strong>&lt;/h1>
+&lt;p>Usually we make a distinction between generator function&amp;rsquo;s and regular function&amp;rsquo;s semantics.&lt;/p>
+&lt;p>The distinction being &lt;code>yield&lt;/code> is the keyword we use to output values back to the caller in a &lt;em>generator function&lt;/em> (in a routine manner) and &lt;code>return&lt;/code> to give back a value in a &lt;em>regular function&lt;/em>.
+So what if we use both &lt;code>yield&lt;/code> and &lt;code>return&lt;/code> in the same function?&lt;/p>
+&lt;p>&lt;em>The following is a property of python 3 only.&lt;/em>&lt;/p>
+&lt;p>Let&amp;rsquo;s create such a function, try to catch its values and examine its behavior.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">In [&lt;span style="color:#ae81ff">1&lt;/span>]: &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">rgen&lt;/span>():
+&lt;span style="color:#f92672">...&lt;/span>: &lt;span style="color:#66d9ef">yield&lt;/span> &lt;span style="color:#e6db74">&amp;#34;came from yield&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">...&lt;/span>: &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#e6db74">&amp;#34;came from return&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Now let&amp;rsquo;s think how we can get those values.
+the yielded value as usual will be obtained by exhausting the generator object.
+as in &lt;code>next(rgen())&lt;/code>. but what about the return value?&lt;/p>
+&lt;p>So if we take a look at &lt;a href="https://www.python.org/dev/peps/pep-0255/">PEP-255&lt;/a>, it says&lt;/p>
+&lt;blockquote>
+&lt;p>When a return statement is encountered, control proceeds as in any function return, executing the appropriate finally clauses (if any exist). Then a StopIteration exception is raised, signalling that the iterator is exhausted.&lt;/p>
+&lt;/blockquote>
+&lt;p>Ok so that&amp;rsquo;s fine, it&amp;rsquo;ll raise a StopIteration exception signaling we&amp;rsquo;re done. if that&amp;rsquo;s true then.. let&amp;rsquo;s try and catch it.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">In [&lt;span style="color:#ae81ff">2&lt;/span>]: g &lt;span style="color:#f92672">=&lt;/span> rgen()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>first we have to make it go to the the yield statement as in any generator:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">In [&lt;span style="color:#ae81ff">3&lt;/span>]: next(g)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>which outputs, as expected:&lt;/p>
+&lt;pre tabindex="0">&lt;code>came from yield
+&lt;/code>&lt;/pre>&lt;p>now to the interesting part;&lt;/p>
+&lt;blockquote>
+&lt;p>A StopIteration attribute was added in v3.3, namely &lt;code>value&lt;/code> (&lt;a href="https://docs.python.org/3/library/exceptions.html#StopIteration">source&lt;/a>). This attribute will be the holder of our value.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">In [&lt;span style="color:#ae81ff">4&lt;/span>]: &lt;span style="color:#66d9ef">try&lt;/span>:
+print(next(g))
+&lt;span style="color:#f92672">...&lt;/span>: &lt;span style="color:#66d9ef">except&lt;/span> &lt;span style="color:#a6e22e">StopIteration&lt;/span> &lt;span style="color:#66d9ef">as&lt;/span> e:
+print(e&lt;span style="color:#f92672">.&lt;/span>value)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We run it and indeed a the return raised a StopIteration exception which we successfully caught, printing:&lt;/p>
+&lt;pre tabindex="0">&lt;code>came from return
+&lt;/code>&lt;/pre>&lt;p>So that&amp;rsquo;s neat. Notice the meaning behind the return in this context, as said in the &lt;a href="https://www.python.org/dev/peps/pep-0255/#then-why-not-allow-an-expression-on-return-too">pep&lt;/a>: &lt;em>&amp;ldquo;I&amp;rsquo;m done, but I have one final useful value to return too, and this is it&amp;rdquo;&lt;/em>, with an emphasis on &lt;em>I&amp;rsquo;m done&lt;/em>, because any yield &lt;strong>after&lt;/strong> the return statement &lt;strong>will not&lt;/strong> be executed.&lt;/p>
+&lt;p>Note that this thing, generally speaking, is equivalent to doing &lt;code>raise StopIteration(value)&lt;/code>, so the applications are pretty similar.&lt;/p>
+&lt;p>If you wish to terminate a generator function early and give an indication as to what happened or some sort of a resulting value, that may be the way to go.&lt;/p>
+&lt;p>Though maybe in most implementations of a generator function you&amp;rsquo;d have a different mechanism for stopping at the right time, I personally have found it useful/ elegant, for instance, in a situation like a recursive generator function in which you wish to early terminate inner iteration.&lt;/p>
+&lt;p>Overall pretty neat feature.&lt;/p>
+&lt;h1 id="generators-lost-brother-the-coroutine">&lt;strong>Generator&amp;rsquo;s Lost Brother, the Coroutine&lt;/strong>&lt;/h1>
+&lt;h5 id="not-the-async-one">not the async one&lt;/h5>
+&lt;p>Introduced in &lt;a href="https://www.python.org/dev/peps/pep-0342/">PEP-342&lt;/a>, coroutines are somewhat of an obscure feature of python, more often than not, discarded on tutorials covering generators.
+And that&amp;rsquo;s a shame, because useful or unuseful as you&amp;rsquo;ll find it, it&amp;rsquo;s kind of a cool concept.&lt;/p>
+&lt;p>In its essence, a coroutine is a generator, using the syntax and nature of the generator, but acts in a somewhat reversed manner. Instead of spitting out values, the coroutine takes them in.&lt;/p>
+&lt;p>Let&amp;rsquo;s clarify with an example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>():
+print(&lt;span style="color:#e6db74">&amp;#39;listening...&amp;#39;&lt;/span>)
+x &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">yield&lt;/span>
+print(&lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;I received &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>x&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">!&amp;#34;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Kinda weird in a glance, what is the yield doing on a right side of an assignment?&lt;/p>
+&lt;p>I said a coroutine would take a value in. So what we&amp;rsquo;ll do here is send a value through the yield placing it in x. The way we&amp;rsquo;re going to do that is by the &lt;code>send&lt;/code> method (provided by the beloved pep-342).&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#f92672">&amp;gt;&amp;gt;&amp;gt;&lt;/span> x &lt;span style="color:#f92672">=&lt;/span> f()
+&lt;span style="color:#f92672">&amp;gt;&amp;gt;&amp;gt;&lt;/span> next(x) &lt;span style="color:#75715e"># first we must advance the function to the yield statement&lt;/span>
+listening&lt;span style="color:#f92672">...&lt;/span>
+&lt;span style="color:#f92672">&amp;gt;&amp;gt;&amp;gt;&lt;/span> x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;a greeting&amp;#39;&lt;/span>)
+I received a greeting&lt;span style="color:#960050;background-color:#1e0010">!&lt;/span>
+&lt;span style="color:#75715e"># followed by a nasty StopIteration error&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The send method accepts the argument, sends it to the coroutine, then advances to the next yield statement. If there is none, a StopIteration error will be raised.&lt;/p>
+&lt;p>You could also send a value to a regular generator, but the value you get back would just be the thing it yields.&lt;/p>
+&lt;p>It&amp;rsquo;s recommended to &lt;code>.close()&lt;/code> the coroutine after you&amp;rsquo;re done (though the gc will probably handle it).&lt;/p>
+&lt;p>Another side-note because it was introduced in the same pep discussed and may be relevant later- you can throw or in a way inject an exception as if it was raised inside the coroutine.
+Meaning we could &lt;code>x.throw(RunTimeError, &amp;quot;something's gone wrong&amp;quot;)&lt;/code> for example and it&amp;rsquo;d behave as if the error originated from the suspension point at the yield statement
+It&amp;rsquo;s basically just pinpointing an error from outside to the belly of the residing coroutine.&lt;/p>
+&lt;p>&amp;ndash;&lt;/p>
+&lt;p>A common example given on this subject is a grep coroutine to which you send lines and get an answer as to whether or not the query was found in the given line, but I don&amp;rsquo;t feel like going through that, you can implement and send it to me though if you feel like it. More practical examples such as a scheduler and an echo server can be found &lt;a href="https://www.python.org/dev/peps/pep-0342/#examples">here&lt;/a>.&lt;/p>
+&lt;p>What I want to discuss is a simple misguided bad idea I had which has let me to better understand the concept and was pretty entertaining in my opinion.&lt;/p>
+&lt;h1 id="a-yield-yield-conundrum">A yield yield conundrum&lt;/h1>
+&lt;h5 id="understanding-by-a-misunderstanding">understanding by a misunderstanding&lt;/h5>
+&lt;p>When I first encountered the concept of generator-coroutine I had an idea, what if we made a function to be a coroutine and a generator at the same time?&lt;/p>
+&lt;p>I remember at the time I&amp;rsquo;ve read some text about the subject that mentioned something like this will lead to weird behavior, might make your mind bend and other crazy disclaimers eventually leading it to not even try and cover the topic.&lt;/p>
+&lt;p>Perhaps I should have listened, but I think not.&lt;/p>
+&lt;p>The idea was extremely simple: make a function what yields the &lt;code>(yield)&lt;/code> such that when you send value to the function it will yield it back to you. Basically an echo generator-coroutine.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>():
+&lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#66d9ef">True&lt;/span>:
+&lt;span style="color:#66d9ef">yield&lt;/span> (&lt;span style="color:#66d9ef">yield&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>note we have to put the second &lt;code>yield&lt;/code> in brackets to let the lexer know it&amp;rsquo;s an expression (we would later send a value to) rather than just the keyword &lt;code>yield&lt;/code> which will kinda entail we&amp;rsquo;re trying to yield the yield keyword and result in a syntax error.&lt;/p>
+&lt;/blockquote>
+&lt;p>Let&amp;rsquo;s test this out:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">In [&lt;span style="color:#ae81ff">7&lt;/span>]: x &lt;span style="color:#f92672">=&lt;/span> f()
+In [&lt;span style="color:#ae81ff">8&lt;/span>]: next(x)
+In [&lt;span style="color:#ae81ff">9&lt;/span>]: x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>)
+Out[&lt;span style="color:#ae81ff">9&lt;/span>]: &lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>
+In [&lt;span style="color:#ae81ff">10&lt;/span>]: x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>)
+In [&lt;span style="color:#ae81ff">11&lt;/span>]: x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>)
+Out[&lt;span style="color:#ae81ff">11&lt;/span>]: &lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>
+In [&lt;span style="color:#ae81ff">12&lt;/span>]: x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>)
+In [&lt;span style="color:#ae81ff">13&lt;/span>]: x&lt;span style="color:#f92672">.&lt;/span>send(&lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>)
+Out[&lt;span style="color:#ae81ff">13&lt;/span>]: &lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Seemingly it only responds to every other message we pass it. What&amp;rsquo;s going on?&lt;/p>
+&lt;p>To make things clearer, I will mention I used ipython in the examples above, in which if the response is None, it just wouldn&amp;rsquo;t display it.&lt;/p>
+&lt;p>So it&amp;rsquo;s not that it doesn&amp;rsquo;t respond to every other send, it&amp;rsquo;s that every other send yields back a None.
+Why?&lt;/p>
+&lt;p>So we can begin to understand by taking a look at the disassembly:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">In [&lt;span style="color:#ae81ff">14&lt;/span>]: &lt;span style="color:#f92672">from&lt;/span> dis &lt;span style="color:#f92672">import&lt;/span> dis
+In [&lt;span style="color:#ae81ff">14&lt;/span>]: dis(f)
+&lt;span style="color:#ae81ff">3&lt;/span> &lt;span style="color:#f92672">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> LOAD_CONST &lt;span style="color:#ae81ff">0&lt;/span> (&lt;span style="color:#66d9ef">None&lt;/span>)
+&lt;span style="color:#ae81ff">2&lt;/span> YIELD_VALUE
+&lt;span style="color:#ae81ff">4&lt;/span> YIELD_VALUE
+&lt;span style="color:#ae81ff">6&lt;/span> POP_TOP
+&lt;span style="color:#ae81ff">8&lt;/span> JUMP_ABSOLUTE &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#ae81ff">10&lt;/span> LOAD_CONST &lt;span style="color:#ae81ff">0&lt;/span> (&lt;span style="color:#66d9ef">None&lt;/span>)
+&lt;span style="color:#ae81ff">12&lt;/span> RETURN_VALUE
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We thought it&amp;rsquo;ll be all rainbows and sunshines, we would just send a value to the second yield and the first yield will take it and yield it back to us.
+But as we see, it for some reason first loads the const &lt;code>None&lt;/code> then yields stuff out.&lt;/p>
+&lt;p>According to pep-325:&lt;/p>
+&lt;blockquote>
+&lt;p>The yield-statement will be allowed to be used on the right-hand side of an assignment; in that case it is referred to as yield-expression. The value of this yield-expression is None unless send() was called with a non-None argument.&lt;/p>
+&lt;/blockquote>
+&lt;p>What&amp;rsquo;s actually going on is two things:&lt;/p>
+&lt;ol>
+&lt;li>The first &lt;code>yield&lt;/code> yields None, being that the &lt;code>(yield)&lt;/code> evaluates to None.&lt;/li>
+&lt;li>The second yield yields the value sent to the first &lt;code>yield&lt;/code>, that being our argument to the &lt;code>send&lt;/code> method.&lt;/li>
+&lt;/ol>
+&lt;p>To draw the two points together - the first always outputs None and receives some value. The second is always outputting the former value and ignoring input.
+Remember- yield &lt;em>always&lt;/em> has both input &amp;amp; output, both of which can be None.&lt;/p>
+&lt;p>If you think about it, it doesn&amp;rsquo;t make sense for it to be any other way. We naively expected it to stop after the first yield, wait for us to send value to the second (yield) and echo back, but.. that&amp;rsquo;s not really reasonable considering the nature of the generator, just like the pep says &amp;ldquo;&lt;em>Blocks in Python are not compiled into thunks; rather, yield suspends execution of the generator&amp;rsquo;s frame.&lt;/em>&amp;rdquo;.&lt;/p>
+&lt;p>Of course it wouldn&amp;rsquo;t wait for our response, it&amp;rsquo;s a generator that already took control! the second yield has to have a default value in order for the generator to yield something back to us.&lt;/p>
+&lt;p>I spent too much time trying to figure this out on my own when the answer was under my nose in the pep all along just waiting to be read. That being said, I think it was a nice trigger to a- remember to RTFM and b- actually understand how control transfers and the nature of generators &amp;amp; coroutines.&lt;/p>
+&lt;h1 id="a-fix">A fix&lt;/h1>
+&lt;p>With the understanding we&amp;rsquo;ve acquired, can we fix it?
+Well yeah, we know by now a coroutine has both an input and an output. So granted we wouldn&amp;rsquo;t have a cool yield yield but by understanding that the behavior we were looking for was already deeply rooted in the coroutine, we could just do-&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>():
+v &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">None&lt;/span>
+&lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#66d9ef">True&lt;/span>:
+v &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">yield&lt;/span> v
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Making the yield take v as an input and an output interchangeably.&lt;/p>
+&lt;h2 id="cutting-a-function-in-half">&lt;strong>Cutting a Function in Half&lt;/strong>&lt;/h2>
+&lt;p>If you think about it, besides handling iteration and yielding out values, generators have another really interesting property- they can hold state. You could pass control to a generator function and it would halt until you actively advance it further.&lt;/p>
+&lt;p>How does this apply?&lt;/p>
+&lt;p>Let&amp;rsquo;s think about this recurring phenomena-&lt;/p>
+&lt;p>you open a file -&amp;gt; you close a file,&lt;/p>
+&lt;p>you acquire a lock -&amp;gt; you release a lock,&lt;/p>
+&lt;p>you start a timer -&amp;gt; you end a timer,&lt;/p>
+&lt;p>you open a socket -&amp;gt; you close a socket&lt;/p>
+&lt;p>etc.&lt;/p>
+&lt;p>You may guess where I&amp;rsquo;m going with this - context managers, &amp;ldquo;the thing that relieves you the worries of closing stuff after you finish, the &lt;code>with&lt;/code> block&amp;rdquo;.&lt;/p>
+&lt;p>Such context manager can be implemented as a class with the dunder methods &lt;code>__enter__&lt;/code> and &lt;code>__exit__&lt;/code>. Let&amp;rsquo;s say for example we want to create a temp directory, meaning we create a new folder, do some stuff in it, then deleting it. An implementation of that could go like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#f92672">import&lt;/span> tempfile
+&lt;span style="color:#f92672">import&lt;/span> shutil
+&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Tempdir&lt;/span>(object):
+&lt;span style="color:#66d9ef">def&lt;/span> __enter__(self):
+self&lt;span style="color:#f92672">.&lt;/span>dirname &lt;span style="color:#f92672">=&lt;/span> tempfile&lt;span style="color:#f92672">.&lt;/span>mktemp()
+&lt;span style="color:#66d9ef">return&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>dirname
+&lt;span style="color:#66d9ef">def&lt;/span> __exit__(self, exc, val, tb):
+shutil&lt;span style="color:#f92672">.&lt;/span>rmtree(self&lt;span style="color:#f92672">.&lt;/span>dirname)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>And that&amp;rsquo;s great and all, but pretty verbose to implement for every context manager we need.&lt;/p>
+&lt;p>What if we abstract out the class and provide a simpler interface for creating those sorts of context managers?&lt;/p>
+&lt;h1 id="game-plan">Game plan:&lt;/h1>
+&lt;p>We&amp;rsquo;re going to base this thing on a generator.
+We know a yield statement can in a way pause a function, we can think of it as cutting it to two pieces- what comes before, and what comes after. As mentioned before &lt;em>it would halt until you actively advance it further&lt;/em>.&lt;/p>
+&lt;p>That&amp;rsquo;s the goal here.
+We&amp;rsquo;re gonna make an interface that wraps around a generator function in which we&amp;rsquo;re doing stuff at the entry point (could be opening a file, starting a timer, whatever), then yielding after it to mark the halfpoint, after which we merely clean up (closing something, ending a timer, etc), with as little boilerplate as possible.&lt;/p>
+&lt;p>We start by creating a class that entails the underlying &lt;code>__enter__&lt;/code> and &lt;code>__exit__&lt;/code> methods on the generator object we would later cover with a wrapper function.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">ContextManager&lt;/span>:
+&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, func, args, kwds):
+self&lt;span style="color:#f92672">.&lt;/span>gen &lt;span style="color:#f92672">=&lt;/span> func(&lt;span style="color:#f92672">*&lt;/span>args, &lt;span style="color:#f92672">**&lt;/span>kwds)
+self&lt;span style="color:#f92672">.&lt;/span>args, self&lt;span style="color:#f92672">.&lt;/span>kwds &lt;span style="color:#f92672">=&lt;/span> args, kwds
+&lt;span style="color:#75715e"># pre yield&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> __enter__():
+&lt;span style="color:#66d9ef">try&lt;/span>:
+next(self&lt;span style="color:#f92672">.&lt;/span>gen) &lt;span style="color:#75715e"># to advance it to the yield statement&lt;/span>
+&lt;span style="color:#66d9ef">except&lt;/span> &lt;span style="color:#a6e22e">StopIteration&lt;/span>:
+&lt;span style="color:#66d9ef">raise&lt;/span> RunTimeError(&lt;span style="color:#e6db74">&amp;#34;didn&amp;#39;t yield&amp;#34;&lt;/span>)
+&lt;span style="color:#75715e"># post yield&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> __exit__(self, typ, value, traceback):
+&lt;span style="color:#66d9ef">if&lt;/span> typ &lt;span style="color:#f92672">is&lt;/span> &lt;span style="color:#66d9ef">None&lt;/span>:
+&lt;span style="color:#66d9ef">try&lt;/span>: &lt;span style="color:#75715e"># we need to take care of the case where the function would have more than one yield point&lt;/span>
+next(self&lt;span style="color:#f92672">.&lt;/span>gen)
+&lt;span style="color:#66d9ef">except&lt;/span> &lt;span style="color:#a6e22e">StopIteration&lt;/span>:
+&lt;span style="color:#66d9ef">return&lt;/span>
+&lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;span style="color:#66d9ef">raise&lt;/span> RunTimeError(&lt;span style="color:#e6db74">&amp;#34;generator didn&amp;#39;t stop&amp;#34;&lt;/span>) &lt;span style="color:#75715e"># gen didn&amp;#39;t stop because it keeps on yielding&lt;/span>
+&lt;span style="color:#75715e"># this whole construction can seem complicated but we need to let the user know it&amp;#39;s misusing the class and the generator provided doesn&amp;#39;t have a single median yield point.&lt;/span>
+&lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;span style="color:#f92672">...&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34; The implementation for this function has to be somewhat convoluted and handle various edge cases.
+&lt;/span>&lt;span style="color:#e6db74"> So we&amp;#39;ll just stick with that for now because it&amp;#39;s not our main focus here&amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Afterwards we just need a function that&amp;rsquo;ll wrap the class, conveniently with &lt;code>functools.wraps&lt;/code>, simply as-&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">contextmanager&lt;/span>(f):
+&lt;span style="color:#a6e22e">@wraps&lt;/span>(func)
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">helper&lt;/span>(&lt;span style="color:#f92672">*&lt;/span>args, &lt;span style="color:#f92672">**&lt;/span>kwds):
+&lt;span style="color:#66d9ef">return&lt;/span> ContextManager(func, args, kwds)
+&lt;span style="color:#66d9ef">return&lt;/span> helper
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>if you&amp;rsquo;re not familiar with the above sort of implementation i recommend googling on higher order functions &amp;amp; decorators in python&lt;/p>
+&lt;/blockquote>
+&lt;p>After we got that we can use contextmanager as a decorator and implement contextmanagers simply as functions wrapped by it.&lt;/p>
+&lt;p>We can implement the Tempdir we wrote earlier as the following:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#a6e22e">@contextmanager&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">tempdir&lt;/span>():
+tmpdir &lt;span style="color:#f92672">=&lt;/span> tempfile&lt;span style="color:#f92672">.&lt;/span>mktemp()
+&lt;span style="color:#66d9ef">try&lt;/span>: &lt;span style="color:#66d9ef">yield&lt;/span> tmpdir
+&lt;span style="color:#66d9ef">finally&lt;/span>: shutil&lt;span style="color:#f92672">.&lt;/span>rmtree(outdir)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Such that it tries to yield, and if an error was suppressed or not, we remove the tmpdir we created earlier.&lt;/p>
+&lt;p>of course we can later use this temp folder as:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-py" data-lang="py">&lt;span style="color:#66d9ef">with&lt;/span> tempdir() &lt;span style="color:#66d9ef">as&lt;/span> tmp:
+&lt;span style="color:#f92672">...&lt;/span> &lt;span style="color:#75715e"># messing with stuff inside the directory&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The contextmanager wrapper acts as an abstraction whose job is to put the pieces together behind the scenes and to give us the bare bones of what we want to be dealing with.&lt;/p>
+&lt;p>This is not actually a new concept, it&amp;rsquo;s precisely the way &lt;code>contextlib.contextmanager&lt;/code> function works, albeit the actual implementation is more complex as it handles several more edge cases than we discussed, see &lt;a href="https://github.com/python/cpython/blob/main/Lib/contextlib.py#L139">here&lt;/a>.&lt;/p>
+&lt;p>Two key takeaways:&lt;/p>
+&lt;ol>
+&lt;li>We can make cool context managers easily with &lt;code>@contextmannager&lt;/code>.&lt;/li>
+&lt;li>And this is my favorite- we&amp;rsquo;ve exemplified a completely different kind of use case for generators. We&amp;rsquo;re using the yield to do something that isn&amp;rsquo;t at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting.&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;p>So this is it for now. Of course if you have more generator tricks/ related topics you think would be nice to cover, contact me and I&amp;rsquo;ll extend the post/ write about it another time :D&lt;/p></content></item></channel></rss>
