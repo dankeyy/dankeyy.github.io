@@ -280,7 +280,7 @@ What we&amp;rsquo;re really waiting for now, is the well expected StopIteration 
 Hello from Context Manager!!!
 Operation Completed
 &lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;small-caveat&#34;&gt;Small Caveat:&lt;/h3&gt;
-&lt;p&gt;I know I know I said we&amp;rsquo;re done. But see now we got a certain limitation; What if we wanted to pass a parameter to the context manager? Like what if say we wanted that a different kind of string would come back?&lt;/p&gt;
+&lt;p&gt;I know I know I said we&amp;rsquo;re done. But see now we&amp;rsquo;ve got a certain limitation; What if we wanted to pass a parameter to the context manager? Like what if say we wanted that a different kind of string would come back?&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Note: It may sound silly for us to try and return our own string but think about it in a broader way; let&amp;rsquo;s say we make a file opener CM, wouldn&amp;rsquo;t we want to specify the file&amp;rsquo;s name?&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -297,9 +297,9 @@ We obviously can&amp;rsquo;t just&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;A class which by no means implements a &lt;code&gt;__call__&lt;/code&gt; method, so when we specify &lt;code&gt;()&lt;/code&gt; after &lt;code&gt;context_hello&lt;/code&gt; python doesn&amp;rsquo;t know what the hell to do with this call.&lt;/p&gt;
 &lt;p&gt;So what &lt;em&gt;can&lt;/em&gt; we do?
-At this point we&amp;rsquo;re way past &lt;code&gt;__init__&lt;/code&gt;, so giving arguments it way due.&lt;/p&gt;
+At this point we&amp;rsquo;re way past &lt;code&gt;__init__&lt;/code&gt;, so somehow passing the arguments to the function is pretty overdue.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Which by the way I kinda fooled you with the &lt;code&gt;*args&lt;/code&gt; and &lt;code&gt;**kwargs&lt;/code&gt; in the implementation there, we are definitely passing absolutely nothing there).&lt;/p&gt;
+&lt;p&gt;Which by the way I kinda fooled you with the &lt;code&gt;*args&lt;/code&gt; and &lt;code&gt;**kwargs&lt;/code&gt; in the implementation there, we are definitely passing absolutely nothing there.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Giving arguments to pass to the function from the call to the initiallization is too confusing and backwards to even think about.&lt;/p&gt;
 &lt;p&gt;So we can do something very simple here, turn it back to a function!&lt;/p&gt;
@@ -351,17 +351,17 @@ Operation Completed
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    tmp&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;write(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;hello world&amp;#39;&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;digressions-clarifications&#34;&gt;Digressions, Clarifications&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;I didn&amp;rsquo;t tell you but what we&amp;rsquo;ve actually gone through here is a miniature implementations of python&amp;rsquo;s &lt;code&gt;contextlib.contextmanager&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;I didn&amp;rsquo;t tell you but what we&amp;rsquo;ve actually gone through here is a miniature implementation of python&amp;rsquo;s &lt;code&gt;contextlib.contextmanager&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;The &lt;a href=&#34;https://github.com/python/cpython/blob/3.10/Lib/contextlib.py&#34;&gt;actual implementation&lt;/a&gt; is A LOT more complex, it handles A LOT more edge cases and exceptions, and its &lt;a href=&#34;https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager&#34;&gt;recommended usage&lt;/a&gt; is generally more cautious as well.&lt;/li&gt;
-&lt;li&gt;I hope the simplification made it more digestible for you.&lt;/li&gt;
+&lt;li&gt;I hope the simplification made it somewhat more digestible for you.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id=&#34;lessons-from-this-chapter&#34;&gt;Lessons from this Chapter&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;We can easily make cool context managers with &lt;code&gt;@contextmannager&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;And this more important IMO - we&amp;rsquo;ve exemplified an almost completely different kind of use case for generators.
-We&amp;rsquo;re using the yield to do something that isn&amp;rsquo;t at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting.&lt;/li&gt;
+&lt;li&gt;We can easily make cool context managers with &lt;code&gt;@contextmanager&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;And this more important IMO - we&amp;rsquo;ve exemplified a totally different kind of functionality.
+We&amp;rsquo;re using generator functionality to do something that isn&amp;rsquo;t at all like its ordinary use. There is no iterating over a sequence here, nor messing with concurrency, nothing like that. The generator merely acts like a mediator between entering to exiting. Which is pretty cool, or at least, educating.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;To be Continued...
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;To be Continued...? maybe
 &lt;/code&gt;&lt;/pre&gt;</content>
     </item>
     

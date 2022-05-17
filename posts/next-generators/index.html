@@ -403,7 +403,7 @@ What we&rsquo;re really waiting for now, is the well expected StopIteration exce
 Hello from Context Manager!!!
 Operation Completed
 </code></pre><h3 id="small-caveat">Small Caveat:<a href="#small-caveat" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
-<p>I know I know I said we&rsquo;re done. But see now we got a certain limitation; What if we wanted to pass a parameter to the context manager? Like what if say we wanted that a different kind of string would come back?</p>
+<p>I know I know I said we&rsquo;re done. But see now we&rsquo;ve got a certain limitation; What if we wanted to pass a parameter to the context manager? Like what if say we wanted that a different kind of string would come back?</p>
 <blockquote>
 <p>Note: It may sound silly for us to try and return our own string but think about it in a broader way; let&rsquo;s say we make a file opener CM, wouldn&rsquo;t we want to specify the file&rsquo;s name?</p>
 </blockquote>
@@ -420,9 +420,9 @@ We obviously can&rsquo;t just</p>
 </blockquote>
 <p>A class which by no means implements a <code>__call__</code> method, so when we specify <code>()</code> after <code>context_hello</code> python doesn&rsquo;t know what the hell to do with this call.</p>
 <p>So what <em>can</em> we do?
-At this point we&rsquo;re way past <code>__init__</code>, so giving arguments it way due.</p>
+At this point we&rsquo;re way past <code>__init__</code>, so somehow passing the arguments to the function is pretty overdue.</p>
 <blockquote>
-<p>Which by the way I kinda fooled you with the <code>*args</code> and <code>**kwargs</code> in the implementation there, we are definitely passing absolutely nothing there).</p>
+<p>Which by the way I kinda fooled you with the <code>*args</code> and <code>**kwargs</code> in the implementation there, we are definitely passing absolutely nothing there.</p>
 </blockquote>
 <p>Giving arguments to pass to the function from the call to the initiallization is too confusing and backwards to even think about.</p>
 <p>So we can do something very simple here, turn it back to a function!</p>
@@ -474,17 +474,17 @@ Operation Completed
 </span></span><span style="display:flex;"><span>    tmp<span style="color:#f92672">.</span>write(<span style="color:#e6db74">&#39;hello world&#39;</span>)
 </span></span></code></pre></div><h3 id="digressions-clarifications">Digressions, Clarifications<a href="#digressions-clarifications" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
 <ul>
-<li>I didn&rsquo;t tell you but what we&rsquo;ve actually gone through here is a miniature implementations of python&rsquo;s <code>contextlib.contextmanager</code>.</li>
+<li>I didn&rsquo;t tell you but what we&rsquo;ve actually gone through here is a miniature implementation of python&rsquo;s <code>contextlib.contextmanager</code>.</li>
 <li>The <a href="https://github.com/python/cpython/blob/3.10/Lib/contextlib.py">actual implementation</a> is A LOT more complex, it handles A LOT more edge cases and exceptions, and its <a href="https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager">recommended usage</a> is generally more cautious as well.</li>
-<li>I hope the simplification made it more digestible for you.</li>
+<li>I hope the simplification made it somewhat more digestible for you.</li>
 </ul>
 <h3 id="lessons-from-this-chapter">Lessons from this Chapter<a href="#lessons-from-this-chapter" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
 <ul>
-<li>We can easily make cool context managers with <code>@contextmannager</code>.</li>
-<li>And this more important IMO - we&rsquo;ve exemplified an almost completely different kind of use case for generators.
-We&rsquo;re using the yield to do something that isn&rsquo;t at all like its ordinary use. There is no iterating over a sequence nor messing with concurrency. The generator merely acts like a mediator between entering to exiting.</li>
+<li>We can easily make cool context managers with <code>@contextmanager</code>.</li>
+<li>And this more important IMO - we&rsquo;ve exemplified a totally different kind of functionality.
+We&rsquo;re using generator functionality to do something that isn&rsquo;t at all like its ordinary use. There is no iterating over a sequence here, nor messing with concurrency, nothing like that. The generator merely acts like a mediator between entering to exiting. Which is pretty cool, or at least, educating.</li>
 </ul>
-<pre tabindex="0"><code>To be Continued...
+<pre tabindex="0"><code>To be Continued...? maybe
 </code></pre>
       </div></div>
 
