@@ -143,9 +143,9 @@ That being said, there&amp;rsquo;s a lot more to them than meets the eye and you
 <li><a href="/posts/next-generators/#introduction">Introduction</a></li>
 <li><a href="/posts/next-generators/#under-the-covers">Slightly Beneath</a></li>
 <li><a href="/posts/next-generators/#yield-and-return">A yield return Duo</a></li>
-<li><a href="/posts/next-generators/#generators-lost-brother-the-coroutine">Generator&rsquo;s Lost Brother</a></li>
+<li><a href="/posts/next-generators/#generators-lost-brother">Generator&rsquo;s Lost Brother</a></li>
 <li><a href="/posts/next-generators/#a-yield-yield-conundrum">A yield yield Conundrum</a></li>
-<li><a href="/posts/next-generators/#cutting-a-function-in-half">Context Managers</a></li>
+<li><a href="/posts/next-generators/#a-different-perspective">Context Managers</a></li>
 </ul>
 <hr>
 <h1 id="introduction"><strong>Introduction</strong><a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
@@ -224,7 +224,7 @@ That&rsquo;s where it gets interesting-</p>
 <p>Note that this thing, generally speaking, is equivalent to doing <code>raise StopIteration(value)</code>, so the applications are pretty similar.</p>
 <p>If you wish to terminate a generator function early and give an indication as to what happened or some sort of a resulting value, that may be the way to go.</p>
 <p>After all the StopIteration stuff and in a slight change of pace let&rsquo;s explore something else.</p>
-<h1 id="generators-lost-brother">**Generator&rsquo;s Lost Brother<a href="#generators-lost-brother" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="generators-lost-brother"><strong>Generator&rsquo;s Lost Brother</strong><a href="#generators-lost-brother" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>Introduced in <a href="https://www.python.org/dev/peps/pep-0342/">PEP-342</a>, coroutines are somewhat of an obscure feature of python, more often than not, discarded on tutorials covering generators.</p>
 <p>In essence, a coroutine is a generator, using the syntax and nature of the generator, but kind of backwards. Instead of spitting out values, the coroutine takes them in.</p>
 <p>Let&rsquo;s see an example:</p>
