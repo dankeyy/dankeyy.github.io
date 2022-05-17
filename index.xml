@@ -263,6 +263,7 @@ What we&amp;rsquo;re really waiting for now, is the well expected StopIteration 
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
 &lt;p&gt;Note: *e stands for various errors that for our purposes aren&amp;rsquo;t really interesting so.. we&amp;rsquo;re just gonna blatantly pretend we didn&amp;rsquo;t see those and surpress them all. shhhhh&amp;hellip;&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;p&gt;Why another next if there&amp;rsquo;s no more stuff to yield you ask? simply because we want to drag ourselves straight down to the end of the function.&lt;/p&gt;
 &lt;p&gt;Tired yet? well don&amp;rsquo;t be because we&amp;rsquo;re done!!&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s make a simple function to see that it works:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-py&#34; data-lang=&#34;py&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;@ContextManager&lt;/span&gt;
