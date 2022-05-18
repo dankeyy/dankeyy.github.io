@@ -320,7 +320,7 @@ Meaning we could <code>x.throw(RunTimeError, &quot;Something's Gone Terribly Wro
 Remember- yield <em>always</em> has both input &amp; output, both of which can be None.</p>
 <p>If you think about it, it doesn&rsquo;t make sense for it to be any other way.  We naively expected it to stop after the first yield, wait for us to send value to the second (yield) and echo back, but.. that&rsquo;s not really reasonable considering the nature of the generator, just like the pep says &ldquo;<em>Blocks in Python are not compiled into thunks; rather, yield suspends execution of the generator&rsquo;s frame.</em>&rdquo;.</p>
 <p>Of course it wouldn&rsquo;t wait for our response, it&rsquo;s a generator that already took control! the second yield has to have a default value in order for the generator to yield something back to us.</p>
-<h1 id="a-fix">A fix<a href="#a-fix" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h5 id="a-fix">A fix<a href="#a-fix" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h5>
 <p>With the understanding we&rsquo;ve acquired, can we fix it?
 Well yeah, we know by now a coroutine has both an input and an output. So granted we wouldn&rsquo;t have a cool yield yield but by understanding that the behavior we were looking for was already deeply rooted in the coroutine, we could just do-</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">f</span>():
@@ -346,7 +346,7 @@ The first happens up until the yield, the second unfolds right after it.</p>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Tempdir</span>:
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __enter__(self):
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>dirname <span style="color:#f92672">=</span> tempfile<span style="color:#f92672">.</span>mktemp()
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>dirname <span style="color:#f92672">=</span> tempfile<span style="color:#f92672">.</span>mkdtemp()
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>dirname
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __exit__(self, exc, val, tb):
@@ -354,17 +354,16 @@ The first happens up until the yield, the second unfolds right after it.</p>
 </span></span></code></pre></div><p>At enter we do our deeds and at exit we clean up.</p>
 <p>That&rsquo;s great and all, but I probably wouldn&rsquo;t have wanted to implement such class for every context manager I need, I think we could do better.</p>
 <p>What if we could abstract out the class and provide a simpler interface for creating those sorts of context managers?</p>
-<h1 id="game-plan">Game Plan:<a href="#game-plan" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p>So yea ok we know by now a yield statement can in a way pause a function/ slice it into two pieces, something comes before a yield, something comes after.</p>
-<p>We&rsquo;re gonna make an interface that wraps around a generator function in which we&rsquo;re doing stuff at the entry point (could be opening a file, starting a timer, whatever), then yielding after it to mark the halfpoint, after which we merely clean up (closing something, ending a timer, etc), with as little boilerplate as possible.</p>
+<h5 id="game-plan">Game Plan<a href="#game-plan" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h5>
+<p>We&rsquo;re going to make an interface that wraps around a generator function in which we&rsquo;re doing stuff at the entry point (could be opening a file, starting a timer, whatever), then yielding after it to mark the halfpoint, after which we merely clean up (closing something, ending a timer, etc), with as little boilerplate as possible.</p>
 <p>In pseudo code, what we&rsquo;re looking to accomplish here is an interface along the lines of;</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#a6e22e">@ContextManager</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dostuff</span>():
 </span></span><span style="display:flex;"><span>    start operation
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">yield</span> resource <span style="color:#75715e"># if needed, could be a handle to a file, could be some other operation</span>
 </span></span><span style="display:flex;"><span>    end operation
-</span></span></code></pre></div><p>To keep things simple, for now we&rsquo;ll just make our CM print something on entry, return some value, then alert us with another print when we&rsquo;re finished.</p>
-<p>Our general aim is to make a class that could wrap around our desired CM-function with a simple decorator.</p>
+</span></span></code></pre></div><p>Where ContextManager is the class we&rsquo;ve abstracted with which we&rsquo;re able to convert a generator-function (<code>dostuff</code>) into a context manager.
+To keep things simple, for now we&rsquo;ll just make our CM print something on entry, return some value, then alert us with another print when we&rsquo;re finished.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ContextManager</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, func, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
 </span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>gen <span style="color:#f92672">=</span> func(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
@@ -384,7 +383,7 @@ What we&rsquo;re really waiting for now, is the well expected StopIteration exce
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __exit__(self, <span style="color:#f92672">*</span>e):
 </span></span><span style="display:flex;"><span>        next(self<span style="color:#f92672">.</span>gen, <span style="color:#66d9ef">None</span>)
 </span></span></code></pre></div><blockquote>
-<p>Note: *e stands for various errors that for our purposes aren&rsquo;t really interesting so.. we&rsquo;re just gonna blatantly pretend we didn&rsquo;t see those and surpress them all. shhhhh&hellip;</p>
+<p>Note: *e stands for various errors that for our purposes aren&rsquo;t really interesting so we&rsquo;re just going to blatantly pretend we didn&rsquo;t see (and surpress) them all. shhh&hellip;</p>
 </blockquote>
 <p>Why another next if there&rsquo;s no more stuff to yield you ask? simply because we want to drag ourselves straight down to the end of the function.</p>
 <p>Tired yet? well don&rsquo;t be because we&rsquo;re done!!</p>
@@ -402,7 +401,7 @@ What we&rsquo;re really waiting for now, is the well expected StopIteration exce
 <pre tabindex="0"><code>Initiating Operating
 Hello from Context Manager!!!
 Operation Completed
-</code></pre><h3 id="small-caveat">Small Caveat:<a href="#small-caveat" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+</code></pre><h5 id="small-caveat">Small Caveat<a href="#small-caveat" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h5>
 <p>I know I know I said we&rsquo;re done. But see now we&rsquo;ve got a certain limitation; What if we wanted to pass a parameter to the context manager? Like what if say we wanted that a different kind of string would come back?</p>
 <blockquote>
 <p>Note: It may sound silly for us to try and return our own string but think about it in a broader way; let&rsquo;s say we make a file opener CM, wouldn&rsquo;t we want to specify the file&rsquo;s name?</p>
@@ -459,30 +458,27 @@ initialized straight into the generator instance by <code>self.gen = func(*args,
 Custom Message!
 Operation Completed
 </code></pre><p>And that&rsquo;s about it, we succeded in creating a custom, generic and reusable Context Manager wrapper that allows us to create any kind of CM we&rsquo;d like pretty easily.</p>
-<p>A mini example just to leave with a good taste:</p>
-<blockquote>
-<p>Just for the sake of it, imagine it wasn&rsquo;t already possible with <code>open</code> and that we wanted open&rsquo;s write option enabled by default:</p>
+<p>Remember the TempDir class we&rsquo;ve seen at the beginning of this chapter?</p>
+<p>To leave with a good taste, let&rsquo;s see an example on how to implement such tempdir context manager, but this time in yield form with our new contextmanager wrapper;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#a6e22e">@contextmanager</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tempdir</span>():
+</span></span><span style="display:flex;"><span>    dirname <span style="color:#f92672">=</span> tempfile<span style="color:#f92672">.</span>mkdtemp()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">yield</span> dirname
+</span></span><span style="display:flex;"><span>    shutil<span style="color:#f92672">.</span>rmtree(dirname)
+</span></span></code></pre></div><blockquote>
+<p>It&rsquo;s a nice example indeed but do take note that from version 3.2 onwards you may use <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">tempfile.TemporaryDirectory</a> that works as context manager out of the box.</p>
 </blockquote>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@contextmanager</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">writeto</span>(path):
-</span></span><span style="display:flex;"><span>    file <span style="color:#f92672">=</span> open(path, <span style="color:#e6db74">&#39;w&#39;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">yield</span> file
-</span></span><span style="display:flex;"><span>    file<span style="color:#f92672">.</span>close()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> writeto(<span style="color:#e6db74">&#34;tmp.txt&#34;</span>) <span style="color:#66d9ef">as</span> tmp:
-</span></span><span style="display:flex;"><span>    tmp<span style="color:#f92672">.</span>write(<span style="color:#e6db74">&#39;hello world&#39;</span>)
-</span></span></code></pre></div><h3 id="digressions-clarifications">Digressions, Clarifications<a href="#digressions-clarifications" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h4 id="digressions-clarifications">Digressions, Clarifications<a href="#digressions-clarifications" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
 <ul>
 <li>I didn&rsquo;t tell you but what we&rsquo;ve actually gone through here is a miniature implementation of python&rsquo;s <code>contextlib.contextmanager</code>.</li>
-<li>The <a href="https://github.com/python/cpython/blob/3.10/Lib/contextlib.py">actual implementation</a> is A LOT more complex, it handles A LOT more edge cases and exceptions, and its <a href="https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager">recommended usage</a> is generally more cautious as well.</li>
+<li>The <a href="https://github.com/python/cpython/blob/3.10/Lib/contextlib.py">actual implementation</a> is a lot more complex, it handles a lot more edge cases and exceptions, and its <a href="https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager">recommended usage</a> is generally more cautious as well.</li>
 <li>I hope the simplification made it somewhat more digestible for you.</li>
 </ul>
-<h3 id="lessons-from-this-chapter">Lessons from this Chapter<a href="#lessons-from-this-chapter" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h4 id="lessons-from-this-chapter">Lessons from this Chapter<a href="#lessons-from-this-chapter" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
 <ul>
 <li>We can easily make cool context managers with <code>@contextmanager</code>.</li>
-<li>And this more important IMO - we&rsquo;ve exemplified a totally different kind of functionality.
-We&rsquo;re using generator functionality to do something that isn&rsquo;t at all like its ordinary use. There is no iterating over a sequence here, nor messing with concurrency, nothing like that. The generator merely acts like a mediator between entering to exiting. Which is pretty cool, or at least, educating.</li>
+<li>And this, in my opinion, is more important - we&rsquo;ve created a different kind of mechanism around generators.
+We&rsquo;re using generators to do something very different from its ordinary use. There is no iterating over a sequence here, nor messing with concurrency, nothing like that. The generator merely acts like a mediator between entering to exiting. Which is pretty cool, or at least, educating.</li>
 </ul>
 <pre tabindex="0"><code>To be Continued...? maybe
 </code></pre>
