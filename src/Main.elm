@@ -200,10 +200,12 @@ viewPost model slug =
         Just post ->
             case Dict.get slug model.contents of
                 Just body ->
+                    let defaults = Markdown.defaultOptions in
+
                     div []
                         [ h6 [ class "post-title" ] [ text post.title ]
                         , p [ class "post-date" ] [ text post.date ]
-                        , Markdown.toHtml [ class "markdown-content" ] body
+                        , Markdown.toHtmlWith { defaults | sanitize = False }  [ class "markdown-content" ] body
                         ]
 
                 Nothing ->
