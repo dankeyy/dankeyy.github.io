@@ -30,7 +30,7 @@ You had the initial idea, maybe you had a some inspirations along the way from y
 
 But your creation will be confined to the mental space from which you entered the prompt, by not letting the problem collide with the walls of your mind and stretching it out, you've doomed it to be less than or equal to the prompt that gave it away.
 
-The sporadic thoughts of "oh I can actually do X", "Y is redundant!", "I think doing Z could take out those 2 at once!" will simply not come to you if you keep your mind at the surface level of the problem. Intuition and ability have a price, it costs giving away your mind to the problem.
+The sporadic thoughts of "oh I can actually do X", "Y is redundant!", "I think doing Z could take out those 2 problems at once!" will simply not come to you if you keep your mind at the surface level of the problem. Intuition and ability have a price, it costs giving away your mind to the problem.
 
 ## "llms can do that too so what"
 
@@ -62,7 +62,7 @@ Sorry for the doomer post but I think it's important.
 ## appendix
 There are additional ways in which I think ai and agentic developments are harmful, most notably flow state disturbance.
 Which is, if we take the analogy previously mentioned further, not a disturbance to the background threads of your mind, but a disturbance to the main thread of your mind.
-You simply cannot stay in flow state if you keep going back and forth in with a chatbot.  
+You simply cannot stay in flow state if you keep going back and forth with a chatbot.  
 However I do think it's possible to gain the benefits of this without avoiding ai completely, but again you have to consciously structure your ai usage differently to not lose one or the other.
 I won't elaborate on it more and didn't to begin with to not sidetrack from the main idea in the post.
 
