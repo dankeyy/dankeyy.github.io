@@ -6687,8 +6687,8 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{D: 'January 21, 2021', y: 'next-gen-generators', J: 'generators beyond the basics', A: 'next(generators)'},
-		{D: 'April 26, 2026', y: 'ai-debilitation', J: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'}
+		{D: 'April 26, 2026', y: 'ai-debilitation', J: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'},
+		{D: 'January 21, 2021', y: 'next-gen-generators', J: 'generators beyond the basics', A: 'next(generators)'}
 	]);
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$p = _VirtualDom_node('p');
