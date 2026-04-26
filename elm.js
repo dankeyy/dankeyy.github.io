@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.O.B === region.V.B)
+	if (region.P.E === region.V.E)
 	{
-		return 'on line ' + region.O.B;
+		return 'on line ' + region.P.E;
 	}
-	return 'on lines ' + region.O.B + ' through ' + region.V.B;
+	return 'on lines ' + region.P.E + ' through ' + region.V.E;
 }
 
 
@@ -2728,8 +2728,8 @@ var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
 		o: func(record.o),
-		P: record.P,
-		M: record.M
+		Q: record.Q,
+		N: record.N
 	}
 });
 
@@ -2998,10 +2998,10 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 
 		var value = result.a;
 		var message = !tag ? value : tag < 3 ? value.a : value.o;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.P;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.Q;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.M) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.N) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3991,7 +3991,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 		impl.aZ,
 		impl.aW,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.N && impl.N(sendToApp)
+			var divertHrefToApp = impl.O && impl.O(sendToApp)
 			var view = impl.a$;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
@@ -4005,7 +4005,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.F) && (_VirtualDom_doc.title = title = doc.F);
+				(title !== doc.A) && (_VirtualDom_doc.title = title = doc.A);
 			});
 		}
 	);
@@ -4066,7 +4066,7 @@ function _Browser_application(impl)
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		N: function(sendToApp)
+		O: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -6539,7 +6539,7 @@ var $author$project$Main$init = F3(
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 		return _Utils_Tuple2(
-			{v: $elm$core$Dict$empty, J: key, x: route},
+			{v: $elm$core$Dict$empty, K: key, x: route},
 			function () {
 				if (route.$ === 1) {
 					var slug = route.a;
@@ -6616,7 +6616,7 @@ var $author$project$Main$update = F2(
 						model,
 						A2(
 							$elm$browser$Browser$Navigation$pushUrl,
-							model.J,
+							model.K,
 							$elm$url$Url$toString(url)));
 				} else {
 					var href = msg.a.a;
@@ -6687,7 +6687,8 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{I: 'January 21, 2021', C: 'next-gen-generators', Q: 'generators beyond the basics', F: 'next(generators)'}
+		{D: 'January 21, 2021', y: 'next-gen-generators', J: 'generators beyond the basics', A: 'next(generators)'},
+		{D: 'April 26, 2026', y: 'ai-debilitation', J: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'}
 	]);
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$p = _VirtualDom_node('p');
@@ -6711,13 +6712,13 @@ var $author$project$Main$viewPostTeaser = function (post) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/post/' + post.C),
+								$elm$html$Html$Attributes$href('/post/' + post.y),
 								A2($elm$html$Html$Attributes$style, 'text-decoration', 'none'),
 								A2($elm$html$Html$Attributes$style, 'color', '#0066cc')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.F)
+								$elm$html$Html$text(post.A)
 							]))
 					])),
 				A2(
@@ -6729,20 +6730,20 @@ var $author$project$Main$viewPostTeaser = function (post) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.I)
+						$elm$html$Html$text(post.D)
 					])),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.Q)
+						$elm$html$Html$text(post.J)
 					])),
 				A2(
 				$elm$html$Html$a,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$href('/post/' + post.C),
+						$elm$html$Html$Attributes$href('/post/' + post.y),
 						A2($elm$html$Html$Attributes$style, 'color', '#0066cc')
 					]),
 				_List_fromArray(
@@ -6829,7 +6830,7 @@ var $author$project$Main$viewPost = F2(
 			A2(
 				$elm$core$List$filter,
 				function (p) {
-					return _Utils_eq(p.C, slug);
+					return _Utils_eq(p.y, slug);
 				},
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
@@ -6851,7 +6852,7 @@ var $author$project$Main$viewPost = F2(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(post.F)
+									$elm$html$Html$text(post.A)
 								])),
 							A2(
 							$elm$html$Html$p,
@@ -6861,7 +6862,7 @@ var $author$project$Main$viewPost = F2(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(post.I)
+									$elm$html$Html$text(post.D)
 								])),
 							A3(
 							$elm_explorations$markdown$Markdown$toHtmlWith,
@@ -6952,7 +6953,7 @@ var $author$project$Main$view = function (model) {
 					}()
 					]))
 			]),
-		F: 'dankey@blog'
+		A: 'dankey@blog'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(

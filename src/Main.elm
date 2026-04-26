@@ -26,6 +26,11 @@ postsMetadata =
       , title = "next(generators)"
       , date = "January 21, 2021"
       , summary = "generators beyond the basics"
+      },
+      { slug = "ai-debilitation"
+      , title = "ai debilitation and the value of sporadic thoughts"
+      , date = "April 26, 2026"
+      , summary = "think man think"
       }
     ]
 
