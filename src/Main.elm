@@ -138,6 +138,7 @@ view model =
                 , style "font-weight" "700"
                 , style "font-family" "'quicksand'"
                 , style "letter-spacing" "-0.5px"
+                , style "z-index" "-1"
                 ]
                 [ text "dankey@blog" ]
             ]

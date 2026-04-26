@@ -6912,7 +6912,8 @@ var $author$project$Main$view = function (model) {
 								A2($elm$html$Html$Attributes$style, 'font-size', '1.65em'),
 								A2($elm$html$Html$Attributes$style, 'font-weight', '700'),
 								A2($elm$html$Html$Attributes$style, 'font-family', '\'quicksand\''),
-								A2($elm$html$Html$Attributes$style, 'letter-spacing', '-0.5px')
+								A2($elm$html$Html$Attributes$style, 'letter-spacing', '-0.5px'),
+								A2($elm$html$Html$Attributes$style, 'z-index', '-1')
 							]),
 						_List_fromArray(
 							[
