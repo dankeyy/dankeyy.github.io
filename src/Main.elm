@@ -21,20 +21,11 @@ type alias PostMetadata =
 
 postsMetadata : List PostMetadata
 postsMetadata =
-    [ { slug = "hello-world"
-      , title = "Hello World"
-      , date = "April 24, 2026"
-      , summary = "My very first post in a pure Elm blog."
-      }
-    , { slug = "why-elm"
-      , title = "Why I Love Elm"
-      , date = "April 22, 2026"
-      , summary = "The benefits of using Elm for frontend apps."
-      }
-    , { slug = "next-gen-generators"
+    [
+      { slug = "next-gen-generators"
       , title = "next(generators)"
       , date = "January 21, 2021"
-      , summary = "lesser known generator capabilities"
+      , summary = "generators beyond the basics"
       }
     ]
 
