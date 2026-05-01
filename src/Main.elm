@@ -19,6 +19,17 @@ type alias PostMetadata =
     }
 
 
+markdownToHtml : String -> Html Msg
+markdownToHtml body =
+    let
+        defaults =
+            Markdown.defaultOptions
+    in
+    Markdown.toHtmlWith
+        { defaults | sanitize = False }
+        [ class "markdown-content" ]
+        body
+
 postsMetadata : List PostMetadata
 postsMetadata =
     [
@@ -54,7 +65,7 @@ parser =
 type alias Model =
     { key : Nav.Key
     , route : Route
-    , contents : Dict String String   -- slug -> markdown body
+    , contents : Dict String (Html Msg)
     }
 
 
@@ -139,7 +150,8 @@ update msg model =
         GotContent slug result ->
             case result of
                 Ok body ->
-                    ( { model | contents = Dict.insert slug body model.contents }
+                    let rendered = markdownToHtml body in
+                    ( { model | contents = Dict.insert slug rendered model.contents }
                     , Cmd.none
                     )
 
@@ -214,18 +226,12 @@ viewPost : Model -> String -> Html Msg
 viewPost model slug =
     case List.filter (\p -> p.slug == slug) postsMetadata |> List.head of
         Just post ->
-            case Dict.get slug model.contents of
-                Just body ->
-                    let defaults = Markdown.defaultOptions in
-
-                    div []
-                        [ h6 [ class "post-title" ] [ text post.title ]
-                        , p [ class "post-date" ] [ text post.date ]
-                        , Markdown.toHtmlWith { defaults | sanitize = False }  [ class "markdown-content" ] body
-                        ]
-
-                Nothing ->
-                    text ""
+            div []
+                [ h6 [ class "post-title" ] [ text post.title ]
+                , p [ class "post-date" ] [ text post.date ]
+                , Dict.get slug model.contents
+                    |> Maybe.withDefault (text "")
+                ]
 
         Nothing ->
             viewNotFound

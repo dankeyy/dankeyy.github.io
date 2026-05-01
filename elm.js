@@ -6552,6 +6552,36 @@ var $author$project$Main$init = F3(
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	U: $elm$core$Maybe$Nothing,
+	aG: $elm$core$Maybe$Just(
+		{aA: false, aX: false}),
+	aR: true,
+	aT: false
+};
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $author$project$Main$markdownToHtml = function (body) {
+	var defaults = $elm_explorations$markdown$Markdown$defaultOptions;
+	return A3(
+		$elm_explorations$markdown$Markdown$toHtmlWith,
+		_Utils_update(
+			defaults,
+			{aR: false}),
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('markdown-content')
+			]),
+		body);
+};
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
@@ -6683,11 +6713,12 @@ var $author$project$Main$update = F2(
 				var result = msg.b;
 				if (!result.$) {
 					var body = result.a;
+					var rendered = $author$project$Main$markdownToHtml(body);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								s: A3($elm$core$Dict$insert, slug, body, model.s)
+								s: A3($elm$core$Dict$insert, slug, rendered, model.s)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -6697,14 +6728,6 @@ var $author$project$Main$update = F2(
 	});
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -6813,14 +6836,6 @@ var $author$project$Main$viewNotFound = A2(
 					$elm$html$Html$text('← Go home')
 				]))
 		]));
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm_explorations$markdown$Markdown$defaultOptions = {
-	U: $elm$core$Maybe$Nothing,
-	aG: $elm$core$Maybe$Just(
-		{aA: false, aX: false}),
-	aR: true,
-	aT: false
-};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6842,7 +6857,6 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
 var $author$project$Main$viewPost = F2(
 	function (model, slug) {
 		var _v0 = $elm$core$List$head(
@@ -6854,49 +6868,36 @@ var $author$project$Main$viewPost = F2(
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
 			var post = _v0.a;
-			var _v1 = A2($elm$core$Dict$get, slug, model.s);
-			if (!_v1.$) {
-				var body = _v1.a;
-				var defaults = $elm_explorations$markdown$Markdown$defaultOptions;
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$h6,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('post-title')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text(post.z)
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('post-date')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text(post.C)
-								])),
-							A3(
-							$elm_explorations$markdown$Markdown$toHtmlWith,
-							_Utils_update(
-								defaults,
-								{aR: false}),
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('markdown-content')
-								]),
-							body)
-						]));
-			} else {
-				return $elm$html$Html$text('');
-			}
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h6,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('post-title')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(post.z)
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('post-date')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(post.C)
+							])),
+						A2(
+						$elm$core$Maybe$withDefault,
+						$elm$html$Html$text(''),
+						A2($elm$core$Dict$get, slug, model.s))
+					]));
 		} else {
 			return $author$project$Main$viewNotFound;
 		}
