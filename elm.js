@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.P.F === region.V.F)
+	if (region.P.E === region.V.E)
 	{
-		return 'on line ' + region.P.F;
+		return 'on line ' + region.P.E;
 	}
-	return 'on lines ' + region.P.F + ' through ' + region.V.F;
+	return 'on lines ' + region.P.E + ' through ' + region.V.E;
 }
 
 
@@ -4005,7 +4005,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.A) && (_VirtualDom_doc.title = title = doc.A);
+				(title !== doc.z) && (_VirtualDom_doc.title = title = doc.z);
 			});
 		}
 	);
@@ -6539,7 +6539,7 @@ var $author$project$Main$init = F3(
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 		return _Utils_Tuple2(
-			{s: $elm$core$Dict$empty, E: key, m: route},
+			{s: $elm$core$Dict$empty, D: key, m: route},
 			function () {
 				if (route.$ === 1) {
 					var slug = route.a;
@@ -6624,7 +6624,7 @@ var $author$project$Main$update = F2(
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.E,
+								model.D,
 								$elm$url$Url$toString(url))) : _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -6635,7 +6635,7 @@ var $author$project$Main$update = F2(
 										$author$project$Main$fetchContent(slug),
 										A2(
 										$elm$browser$Browser$Navigation$pushUrl,
-										model.E,
+										model.D,
 										$elm$url$Url$toString(url))
 									])));
 					} else {
@@ -6645,7 +6645,7 @@ var $author$project$Main$update = F2(
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.E,
+								model.D,
 								$elm$url$Url$toString(url)));
 					}
 				} else {
@@ -6717,8 +6717,8 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{D: 'April 26, 2026', y: 'ai-debilitation', K: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'},
-		{D: 'January 21, 2021', y: 'next-gen-generators', K: 'generators beyond the basics', A: 'next(generators)'}
+		{C: 'April 26, 2026', F: 'ai-debilitation', K: 'think man think', z: 'ai debilitation and the value of sporadic thoughts'},
+		{C: 'January 21, 2021', F: 'next-gen-generators', K: 'generators beyond the basics', z: 'next(generators)'}
 	]);
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$p = _VirtualDom_node('p');
@@ -6742,13 +6742,13 @@ var $author$project$Main$viewPostTeaser = function (post) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/post/' + post.y),
+								$elm$html$Html$Attributes$href('/post/' + post.F),
 								A2($elm$html$Html$Attributes$style, 'text-decoration', 'none'),
 								A2($elm$html$Html$Attributes$style, 'color', '#0066cc')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.A)
+								$elm$html$Html$text(post.z)
 							]))
 					])),
 				A2(
@@ -6760,7 +6760,7 @@ var $author$project$Main$viewPostTeaser = function (post) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.D)
+						$elm$html$Html$text(post.C)
 					])),
 				A2(
 				$elm$html$Html$p,
@@ -6768,17 +6768,6 @@ var $author$project$Main$viewPostTeaser = function (post) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(post.K)
-					])),
-				A2(
-				$elm$html$Html$a,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$href('/post/' + post.y),
-						A2($elm$html$Html$Attributes$style, 'color', '#0066cc')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Read more →')
 					]))
 			]));
 };
@@ -6860,7 +6849,7 @@ var $author$project$Main$viewPost = F2(
 			A2(
 				$elm$core$List$filter,
 				function (p) {
-					return _Utils_eq(p.y, slug);
+					return _Utils_eq(p.F, slug);
 				},
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
@@ -6882,7 +6871,7 @@ var $author$project$Main$viewPost = F2(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(post.A)
+									$elm$html$Html$text(post.z)
 								])),
 							A2(
 							$elm$html$Html$p,
@@ -6892,7 +6881,7 @@ var $author$project$Main$viewPost = F2(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(post.D)
+									$elm$html$Html$text(post.C)
 								])),
 							A3(
 							$elm_explorations$markdown$Markdown$toHtmlWith,
@@ -6906,13 +6895,7 @@ var $author$project$Main$viewPost = F2(
 							body)
 						]));
 			} else {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Loading post...')
-						]));
+				return $elm$html$Html$text('');
 			}
 		} else {
 			return $author$project$Main$viewNotFound;
@@ -6983,7 +6966,7 @@ var $author$project$Main$view = function (model) {
 					}()
 					]))
 			]),
-		A: 'dankey@blog'
+		z: 'dankey@blog'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(

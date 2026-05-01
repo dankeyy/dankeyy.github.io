@@ -208,7 +208,6 @@ viewPostTeaser post =
         [ h3 [] [ a [ href ("/post/" ++ post.slug), style "text-decoration" "none", style "color" "#0066cc" ] [ text post.title ] ]
         , p [ style "color" "#666", style "margin" "4px 0 12px 0" ] [ text post.date ]
         , p [] [ text post.summary ]
-        , a [ href ("/post/" ++ post.slug), style "color" "#0066cc" ] [ text "Read more →" ]
         ]
 
 
@@ -227,7 +226,7 @@ viewPost model slug =
                         ]
 
                 Nothing ->
-                    div [] [ text "Loading post..." ]
+                    text ""
 
         Nothing ->
             viewNotFound
