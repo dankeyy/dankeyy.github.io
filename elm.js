@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.P.E === region.V.E)
+	if (region.P.F === region.V.F)
 	{
-		return 'on line ' + region.P.E;
+		return 'on line ' + region.P.F;
 	}
-	return 'on lines ' + region.P.E + ' through ' + region.V.E;
+	return 'on lines ' + region.P.F + ' through ' + region.V.F;
 }
 
 
@@ -2727,7 +2727,7 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		o: func(record.o),
+		p: func(record.p),
 		Q: record.Q,
 		N: record.N
 	}
@@ -2997,7 +2997,7 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.o;
+		var message = !tag ? value : tag < 3 ? value.a : value.p;
 		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.Q;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
@@ -6258,7 +6258,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
-		return {r: frag, s: params, q: unvisited, m: value, u: visited};
+		return {t: frag, u: params, r: unvisited, n: value, w: visited};
 	});
 var $elm$url$Url$Parser$getFirstMatch = function (states) {
 	getFirstMatch:
@@ -6268,12 +6268,12 @@ var $elm$url$Url$Parser$getFirstMatch = function (states) {
 		} else {
 			var state = states.a;
 			var rest = states.b;
-			var _v1 = state.q;
+			var _v1 = state.r;
 			if (!_v1.b) {
-				return $elm$core$Maybe$Just(state.m);
+				return $elm$core$Maybe$Just(state.n);
 			} else {
 				if ((_v1.a === '') && (!_v1.b.b)) {
-					return $elm$core$Maybe$Just(state.m);
+					return $elm$core$Maybe$Just(state.n);
 				} else {
 					var $temp$states = rest;
 					states = $temp$states;
@@ -6382,11 +6382,11 @@ var $author$project$Main$PostDetail = function (a) {
 var $elm$url$Url$Parser$Parser = $elm$core$Basics$identity;
 var $elm$url$Url$Parser$mapState = F2(
 	function (func, _v0) {
-		var visited = _v0.u;
-		var unvisited = _v0.q;
-		var params = _v0.s;
-		var frag = _v0.r;
-		var value = _v0.m;
+		var visited = _v0.w;
+		var unvisited = _v0.r;
+		var params = _v0.u;
+		var frag = _v0.t;
+		var value = _v0.n;
 		return A5(
 			$elm$url$Url$Parser$State,
 			visited,
@@ -6399,11 +6399,11 @@ var $elm$url$Url$Parser$map = F2(
 	function (subValue, _v0) {
 		var parseArg = _v0;
 		return function (_v1) {
-			var visited = _v1.u;
-			var unvisited = _v1.q;
-			var params = _v1.s;
-			var frag = _v1.r;
-			var value = _v1.m;
+			var visited = _v1.w;
+			var unvisited = _v1.r;
+			var params = _v1.u;
+			var frag = _v1.t;
+			var value = _v1.n;
 			return A2(
 				$elm$core$List$map,
 				$elm$url$Url$Parser$mapState(value),
@@ -6440,11 +6440,11 @@ var $elm$url$Url$Parser$oneOf = function (parsers) {
 };
 var $elm$url$Url$Parser$s = function (str) {
 	return function (_v0) {
-		var visited = _v0.u;
-		var unvisited = _v0.q;
-		var params = _v0.s;
-		var frag = _v0.r;
-		var value = _v0.m;
+		var visited = _v0.w;
+		var unvisited = _v0.r;
+		var params = _v0.u;
+		var frag = _v0.t;
+		var value = _v0.n;
 		if (!unvisited.b) {
 			return _List_Nil;
 		} else {
@@ -6477,11 +6477,11 @@ var $elm$url$Url$Parser$slash = F2(
 var $elm$url$Url$Parser$custom = F2(
 	function (tipe, stringToSomething) {
 		return function (_v0) {
-			var visited = _v0.u;
-			var unvisited = _v0.q;
-			var params = _v0.s;
-			var frag = _v0.r;
-			var value = _v0.m;
+			var visited = _v0.w;
+			var unvisited = _v0.r;
+			var params = _v0.u;
+			var frag = _v0.t;
+			var value = _v0.n;
 			if (!unvisited.b) {
 				return _List_Nil;
 			} else {
@@ -6539,7 +6539,7 @@ var $author$project$Main$init = F3(
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 		return _Utils_Tuple2(
-			{v: $elm$core$Dict$empty, K: key, x: route},
+			{s: $elm$core$Dict$empty, E: key, m: route},
 			function () {
 				if (route.$ === 1) {
 					var slug = route.a;
@@ -6612,12 +6612,42 @@ var $author$project$Main$update = F2(
 			case 0:
 				if (!msg.a.$) {
 					var url = msg.a.a;
-					return _Utils_Tuple2(
-						model,
-						A2(
-							$elm$browser$Browser$Navigation$pushUrl,
-							model.K,
-							$elm$url$Url$toString(url)));
+					var newRoute = A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Main$NotFound,
+						A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
+					if (newRoute.$ === 1) {
+						var slug = newRoute.a;
+						return A2($elm$core$Dict$member, slug, model.s) ? _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{m: newRoute}),
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.E,
+								$elm$url$Url$toString(url))) : _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{m: newRoute}),
+							$elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[
+										$author$project$Main$fetchContent(slug),
+										A2(
+										$elm$browser$Browser$Navigation$pushUrl,
+										model.E,
+										$elm$url$Url$toString(url))
+									])));
+					} else {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{m: newRoute}),
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.E,
+								$elm$url$Url$toString(url)));
+					}
 				} else {
 					var href = msg.a.a;
 					return _Utils_Tuple2(
@@ -6632,20 +6662,20 @@ var $author$project$Main$update = F2(
 					A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 				if (newRoute.$ === 1) {
 					var slug = newRoute.a;
-					return A2($elm$core$Dict$member, slug, model.v) ? _Utils_Tuple2(
+					return A2($elm$core$Dict$member, slug, model.s) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{x: newRoute}),
+							{m: newRoute}),
 						$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{x: newRoute}),
+							{m: newRoute}),
 						$author$project$Main$fetchContent(slug));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{x: newRoute}),
+							{m: newRoute}),
 						$elm$core$Platform$Cmd$none);
 				}
 			default:
@@ -6657,7 +6687,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								v: A3($elm$core$Dict$insert, slug, body, model.v)
+								s: A3($elm$core$Dict$insert, slug, body, model.s)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -6687,8 +6717,8 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{D: 'April 26, 2026', y: 'ai-debilitation', J: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'},
-		{D: 'January 21, 2021', y: 'next-gen-generators', J: 'generators beyond the basics', A: 'next(generators)'}
+		{D: 'April 26, 2026', y: 'ai-debilitation', K: 'think man think', A: 'ai debilitation and the value of sporadic thoughts'},
+		{D: 'January 21, 2021', y: 'next-gen-generators', K: 'generators beyond the basics', A: 'next(generators)'}
 	]);
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$p = _VirtualDom_node('p');
@@ -6737,7 +6767,7 @@ var $author$project$Main$viewPostTeaser = function (post) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.J)
+						$elm$html$Html$text(post.K)
 					])),
 				A2(
 				$elm$html$Html$a,
@@ -6835,7 +6865,7 @@ var $author$project$Main$viewPost = F2(
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
 			var post = _v0.a;
-			var _v1 = A2($elm$core$Dict$get, slug, model.v);
+			var _v1 = A2($elm$core$Dict$get, slug, model.s);
 			if (!_v1.$) {
 				var body = _v1.a;
 				var defaults = $elm_explorations$markdown$Markdown$defaultOptions;
@@ -6940,7 +6970,7 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						function () {
-						var _v0 = model.x;
+						var _v0 = model.m;
 						switch (_v0.$) {
 							case 0:
 								return $author$project$Main$viewHome;

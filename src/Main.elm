@@ -95,7 +95,28 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LinkClicked (Browser.Internal url) ->
-            ( model, Nav.pushUrl model.key (Url.toString url) )
+            let
+                newRoute =
+                    Parser.parse parser url |> Maybe.withDefault NotFound
+            in
+            case newRoute of
+                PostDetail slug ->
+                    if Dict.member slug model.contents then
+                        ( { model | route = newRoute }
+                        , Nav.pushUrl model.key (Url.toString url)
+                        )
+                    else
+                        ( { model | route = newRoute }
+                        , Cmd.batch
+                            [ fetchContent slug
+                            , Nav.pushUrl model.key (Url.toString url)
+                            ]
+                        )
+
+                _ ->
+                    ( { model | route = newRoute }
+                    , Nav.pushUrl model.key (Url.toString url)
+                    )
 
         LinkClicked (Browser.External href) ->
             ( model, Nav.load href )
