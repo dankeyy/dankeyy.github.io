@@ -6911,8 +6911,7 @@ var $author$project$Main$view = function (model) {
 					[
 						A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
 						A2($elm$html$Html$Attributes$style, 'top', '25px'),
-						A2($elm$html$Html$Attributes$style, 'left', '40px'),
-						A2($elm$html$Html$Attributes$style, 'z-index', '100')
+						A2($elm$html$Html$Attributes$style, 'left', '40px')
 					]),
 				_List_fromArray(
 					[
@@ -6938,7 +6937,7 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'max-width', '760px'),
+						A2($elm$html$Html$Attributes$style, 'max-width', '960px'),
 						A2($elm$html$Html$Attributes$style, 'margin', '100px auto 40px auto'),
 						A2($elm$html$Html$Attributes$style, 'padding', '55px 45px 60px 45px'),
 						A2($elm$html$Html$Attributes$style, 'padding', '0 40px 50px 40px'),

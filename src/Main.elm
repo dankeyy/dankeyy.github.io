@@ -155,7 +155,6 @@ view model =
         [ div [ style "position" "fixed"
               , style "top" "25px"
               , style "left" "40px"
-              , style "z-index" "100"
               ]
             [ a [ href "/"
                 , style "color" "#f0f0f0"
@@ -168,7 +167,7 @@ view model =
                 ]
                 [ text "dankey@blog" ]
             ]
-        , div [ style "max-width" "760px"
+        , div [ style "max-width" "960px"
               , style "margin" "100px auto 40px auto"
               , style "padding" "55px 45px 60px 45px"
               , style "padding" "0 40px 50px 40px"
