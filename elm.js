@@ -6743,7 +6743,6 @@ var $author$project$Main$postsMetadata = _List_fromArray(
 		{C: 'April 26, 2026', F: 'ai-debilitation', K: 'think man think', z: 'ai debilitation and the value of sporadic thoughts'},
 		{C: 'January 21, 2021', F: 'next-gen-generators', K: 'generators beyond the basics', z: 'next(generators)'}
 	]);
-var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewPostTeaser = function (post) {
 	return A2(
@@ -6757,7 +6756,7 @@ var $author$project$Main$viewPostTeaser = function (post) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$h3,
+				$elm$html$Html$p,
 				_List_Nil,
 				_List_fromArray(
 					[
@@ -6767,7 +6766,8 @@ var $author$project$Main$viewPostTeaser = function (post) {
 							[
 								$elm$html$Html$Attributes$href('/post/' + post.F),
 								A2($elm$html$Html$Attributes$style, 'text-decoration', 'none'),
-								A2($elm$html$Html$Attributes$style, 'color', '#0066cc')
+								A2($elm$html$Html$Attributes$style, 'color', '#0066cc'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '26px')
 							]),
 						_List_fromArray(
 							[
@@ -6847,7 +6847,7 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var $elm$html$Html$h6 = _VirtualDom_node('h6');
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -6874,7 +6874,7 @@ var $author$project$Main$viewPost = F2(
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$h6,
+						$elm$html$Html$h1,
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$class('post-title')

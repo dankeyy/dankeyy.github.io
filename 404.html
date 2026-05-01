@@ -77,18 +77,31 @@
             margin: 0;
         }
 
-        ul {
+        .markdown-content ul {
             list-style: none;
             padding-left: 0;
+            margin: 1.5em 0;
         }
-        ul li {
-            padding-left: 8px;
-            margin-bottom: 8px;
+
+        .markdown-content ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 16px;
         }
-        ul li::before {
-            content: "- ";
+
+        .markdown-content ul li::before {
+            content: "~";
             color: #2fb5ae;
+            flex-shrink: 0;
+            font-weight: bold;
         }
+
+        .markdown-content ul li > p:first-child {
+            margin-top: 0 !important;
+            margin-bottom: 0;
+        }
+
         code {
             color: #2fb5ae;
         }
@@ -162,7 +175,7 @@
     }
 
     function addAnchorLinks() {
-        const headings = document.querySelectorAll(['h1', 'h2']);
+        const headings = document.querySelectorAll(['h1', 'h2', 'h3']);
         headings.forEach(h => {
             if (h.querySelector('.anchor')) return;
 

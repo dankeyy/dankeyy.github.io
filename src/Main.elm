@@ -216,7 +216,7 @@ viewHome =
 viewPostTeaser : PostMetadata -> Html Msg
 viewPostTeaser post =
     div [ style "margin-bottom" "40px", style "border-bottom" "1px solid #ddd", style "padding-bottom" "25px" ]
-        [ h3 [] [ a [ href ("/post/" ++ post.slug), style "text-decoration" "none", style "color" "#0066cc" ] [ text post.title ] ]
+        [ p [] [ a [ href ("/post/" ++ post.slug), style "text-decoration" "none", style "color" "#0066cc", style "font-size" "26px"] [ text post.title ] ]
         , p [ style "color" "#666", style "margin" "4px 0 12px 0" ] [ text post.date ]
         , p [] [ text post.summary ]
         ]
@@ -227,7 +227,7 @@ viewPost model slug =
     case List.filter (\p -> p.slug == slug) postsMetadata |> List.head of
         Just post ->
             div []
-                [ h6 [ class "post-title" ] [ text post.title ]
+                [ h1 [ class "post-title" ] [ text post.title ]
                 , p [ class "post-date" ] [ text post.date ]
                 , Dict.get slug model.contents
                     |> Maybe.withDefault (text "")
