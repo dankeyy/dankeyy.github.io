@@ -167,6 +167,14 @@
         }
     }
 
+    function restoreUrlFrom404() {
+        const savedPath = sessionStorage.getItem('btth-redirect');
+        if (savedPath && savedPath !== '/' && savedPath !== '/index.html') {
+            sessionStorage.removeItem('btth-redirect');
+            history.replaceState(null, '', savedPath);
+        }
+    }
+
     function initHighlighting() {
         const app = document.getElementById("app");
         if (!app) return;
@@ -222,6 +230,8 @@
     }
 
     window.addEventListener("load", () => {
+        restoreUrlFrom404();
+
         startApp();
         initHighlighting();
 
