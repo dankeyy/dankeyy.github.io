@@ -74,15 +74,16 @@ The ascension, I think, is strictly present in her words during the travel to Ve
 
 And of course eventually she arrives at the Pensacola-like beach she drew when she was little, "finalizing" the rebirth.
 
-The point of metaphorical rebirth in stories, I think, is to transform your perception too, here it's to look at the questions of the film from a belief standpoint.
-
 
 ### irony
 
-The irony in the film is that Ellie, although self-claimed the opposite, is more of a "believer" than anyone. Her belief system is different but is stronger than the bureaucrats, Drumlin and perhaps even Palmer. The only reason she got so far is because she actually believed in the SETI.
+The irony in the film is that Ellie, although self-claimed the opposite, is more of a "believer" than anyone. Her belief system is different but is stronger than the bureaucrats, Drumlin and perhaps even Palmer. The reason she got so far is because she actually believed in the SETI.
 
 In rebirth, she becomes conscious of it,
 > “Rebirth is not a process that we can in any way observe. We can neither measure nor weigh nor photograph it. It is entirely beyond sense perception… One speaks of rebirth; one professes rebirth; one is filled with rebirth… We have to be content with its psychic reality.” - Jung in "Concerning Rebirth"
+
+The point of metaphorical rebirth in stories, I think, is to transform your perception too, here it's to look at the questions of the film from a belief standpoint.
+
 
 ## self-reference
 Even with all the clues at the end it still isn't conclusive whether or not she has actually been to Vega or hallucinated it.  
