@@ -33,6 +33,11 @@ markdownToHtml body =
 postsMetadata : List PostMetadata
 postsMetadata =
     [
+      { slug = "contact-1997"
+      , title = "contact (1997)"
+      , date = "May 23, 2026"
+      , summary = "contact appreciation post"
+      },
       { slug = "ai-debilitation"
       , title = "ai debilitation and the value of sporadic thoughts"
       , date = "April 26, 2026"

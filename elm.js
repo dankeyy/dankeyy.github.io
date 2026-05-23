@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.P.E === region.V.E)
+	if (region.P.F === region.V.F)
 	{
-		return 'on line ' + region.P.E;
+		return 'on line ' + region.P.F;
 	}
-	return 'on lines ' + region.P.E + ' through ' + region.V.E;
+	return 'on lines ' + region.P.F + ' through ' + region.V.F;
 }
 
 
@@ -4005,7 +4005,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.z) && (_VirtualDom_doc.title = title = doc.z);
+				(title !== doc.w) && (_VirtualDom_doc.title = title = doc.w);
 			});
 		}
 	);
@@ -6258,7 +6258,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
-		return {t: frag, u: params, r: unvisited, n: value, w: visited};
+		return {t: frag, u: params, r: unvisited, n: value, x: visited};
 	});
 var $elm$url$Url$Parser$getFirstMatch = function (states) {
 	getFirstMatch:
@@ -6382,7 +6382,7 @@ var $author$project$Main$PostDetail = function (a) {
 var $elm$url$Url$Parser$Parser = $elm$core$Basics$identity;
 var $elm$url$Url$Parser$mapState = F2(
 	function (func, _v0) {
-		var visited = _v0.w;
+		var visited = _v0.x;
 		var unvisited = _v0.r;
 		var params = _v0.u;
 		var frag = _v0.t;
@@ -6399,7 +6399,7 @@ var $elm$url$Url$Parser$map = F2(
 	function (subValue, _v0) {
 		var parseArg = _v0;
 		return function (_v1) {
-			var visited = _v1.w;
+			var visited = _v1.x;
 			var unvisited = _v1.r;
 			var params = _v1.u;
 			var frag = _v1.t;
@@ -6440,7 +6440,7 @@ var $elm$url$Url$Parser$oneOf = function (parsers) {
 };
 var $elm$url$Url$Parser$s = function (str) {
 	return function (_v0) {
-		var visited = _v0.w;
+		var visited = _v0.x;
 		var unvisited = _v0.r;
 		var params = _v0.u;
 		var frag = _v0.t;
@@ -6477,7 +6477,7 @@ var $elm$url$Url$Parser$slash = F2(
 var $elm$url$Url$Parser$custom = F2(
 	function (tipe, stringToSomething) {
 		return function (_v0) {
-			var visited = _v0.w;
+			var visited = _v0.x;
 			var unvisited = _v0.r;
 			var params = _v0.u;
 			var frag = _v0.t;
@@ -6539,7 +6539,7 @@ var $author$project$Main$init = F3(
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 		return _Utils_Tuple2(
-			{s: $elm$core$Dict$empty, D: key, m: route},
+			{s: $elm$core$Dict$empty, E: key, m: route},
 			function () {
 				if (route.$ === 1) {
 					var slug = route.a;
@@ -6654,7 +6654,7 @@ var $author$project$Main$update = F2(
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.D,
+								model.E,
 								$elm$url$Url$toString(url))) : _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -6665,7 +6665,7 @@ var $author$project$Main$update = F2(
 										$author$project$Main$fetchContent(slug),
 										A2(
 										$elm$browser$Browser$Navigation$pushUrl,
-										model.D,
+										model.E,
 										$elm$url$Url$toString(url))
 									])));
 					} else {
@@ -6675,7 +6675,7 @@ var $author$project$Main$update = F2(
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.D,
+								model.E,
 								$elm$url$Url$toString(url)));
 					}
 				} else {
@@ -6740,8 +6740,9 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{C: 'April 26, 2026', F: 'ai-debilitation', K: 'think man think', z: 'ai debilitation and the value of sporadic thoughts'},
-		{C: 'January 21, 2021', F: 'next-gen-generators', K: 'generators beyond the basics', z: 'next(generators)'}
+		{y: 'May 23, 2026', A: 'contact-1997', G: 'contact appreciation post', w: 'contact (1997)'},
+		{y: 'April 26, 2026', A: 'ai-debilitation', G: 'think man think', w: 'ai debilitation and the value of sporadic thoughts'},
+		{y: 'January 21, 2021', A: 'next-gen-generators', G: 'generators beyond the basics', w: 'next(generators)'}
 	]);
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewPostTeaser = function (post) {
@@ -6764,14 +6765,14 @@ var $author$project$Main$viewPostTeaser = function (post) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/post/' + post.F),
+								$elm$html$Html$Attributes$href('/post/' + post.A),
 								A2($elm$html$Html$Attributes$style, 'text-decoration', 'none'),
 								A2($elm$html$Html$Attributes$style, 'color', '#0066cc'),
 								A2($elm$html$Html$Attributes$style, 'font-size', '26px')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.z)
+								$elm$html$Html$text(post.w)
 							]))
 					])),
 				A2(
@@ -6783,14 +6784,14 @@ var $author$project$Main$viewPostTeaser = function (post) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.C)
+						$elm$html$Html$text(post.y)
 					])),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.K)
+						$elm$html$Html$text(post.G)
 					]))
 			]));
 };
@@ -6863,7 +6864,7 @@ var $author$project$Main$viewPost = F2(
 			A2(
 				$elm$core$List$filter,
 				function (p) {
-					return _Utils_eq(p.F, slug);
+					return _Utils_eq(p.A, slug);
 				},
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
@@ -6881,7 +6882,7 @@ var $author$project$Main$viewPost = F2(
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.z)
+								$elm$html$Html$text(post.w)
 							])),
 						A2(
 						$elm$html$Html$p,
@@ -6891,7 +6892,7 @@ var $author$project$Main$viewPost = F2(
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.C)
+								$elm$html$Html$text(post.y)
 							])),
 						A2(
 						$elm$core$Maybe$withDefault,
@@ -6966,7 +6967,7 @@ var $author$project$Main$view = function (model) {
 					}()
 					]))
 			]),
-		z: 'dankey@blog'
+		w: 'dankey@blog'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
