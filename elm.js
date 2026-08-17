@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.P.F === region.V.F)
+	if (region.P.G === region.V.G)
 	{
-		return 'on line ' + region.P.F;
+		return 'on line ' + region.P.G;
 	}
-	return 'on lines ' + region.P.F + ' through ' + region.V.F;
+	return 'on lines ' + region.P.G + ' through ' + region.V.G;
 }
 
 
@@ -4005,7 +4005,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.w) && (_VirtualDom_doc.title = title = doc.w);
+				(title !== doc.r) && (_VirtualDom_doc.title = title = doc.r);
 			});
 		}
 	);
@@ -6258,7 +6258,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
-		return {t: frag, u: params, r: unvisited, n: value, x: visited};
+		return {v: frag, w: params, s: unvisited, n: value, z: visited};
 	});
 var $elm$url$Url$Parser$getFirstMatch = function (states) {
 	getFirstMatch:
@@ -6268,7 +6268,7 @@ var $elm$url$Url$Parser$getFirstMatch = function (states) {
 		} else {
 			var state = states.a;
 			var rest = states.b;
-			var _v1 = state.r;
+			var _v1 = state.s;
 			if (!_v1.b) {
 				return $elm$core$Maybe$Just(state.n);
 			} else {
@@ -6382,10 +6382,10 @@ var $author$project$Main$PostDetail = function (a) {
 var $elm$url$Url$Parser$Parser = $elm$core$Basics$identity;
 var $elm$url$Url$Parser$mapState = F2(
 	function (func, _v0) {
-		var visited = _v0.x;
-		var unvisited = _v0.r;
-		var params = _v0.u;
-		var frag = _v0.t;
+		var visited = _v0.z;
+		var unvisited = _v0.s;
+		var params = _v0.w;
+		var frag = _v0.v;
 		var value = _v0.n;
 		return A5(
 			$elm$url$Url$Parser$State,
@@ -6399,10 +6399,10 @@ var $elm$url$Url$Parser$map = F2(
 	function (subValue, _v0) {
 		var parseArg = _v0;
 		return function (_v1) {
-			var visited = _v1.x;
-			var unvisited = _v1.r;
-			var params = _v1.u;
-			var frag = _v1.t;
+			var visited = _v1.z;
+			var unvisited = _v1.s;
+			var params = _v1.w;
+			var frag = _v1.v;
 			var value = _v1.n;
 			return A2(
 				$elm$core$List$map,
@@ -6440,10 +6440,10 @@ var $elm$url$Url$Parser$oneOf = function (parsers) {
 };
 var $elm$url$Url$Parser$s = function (str) {
 	return function (_v0) {
-		var visited = _v0.x;
-		var unvisited = _v0.r;
-		var params = _v0.u;
-		var frag = _v0.t;
+		var visited = _v0.z;
+		var unvisited = _v0.s;
+		var params = _v0.w;
+		var frag = _v0.v;
 		var value = _v0.n;
 		if (!unvisited.b) {
 			return _List_Nil;
@@ -6477,10 +6477,10 @@ var $elm$url$Url$Parser$slash = F2(
 var $elm$url$Url$Parser$custom = F2(
 	function (tipe, stringToSomething) {
 		return function (_v0) {
-			var visited = _v0.x;
-			var unvisited = _v0.r;
-			var params = _v0.u;
-			var frag = _v0.t;
+			var visited = _v0.z;
+			var unvisited = _v0.s;
+			var params = _v0.w;
+			var frag = _v0.v;
 			var value = _v0.n;
 			if (!unvisited.b) {
 				return _List_Nil;
@@ -6539,7 +6539,7 @@ var $author$project$Main$init = F3(
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 		return _Utils_Tuple2(
-			{s: $elm$core$Dict$empty, E: key, m: route},
+			{t: $elm$core$Dict$empty, F: key, m: route},
 			function () {
 				if (route.$ === 1) {
 					var slug = route.a;
@@ -6648,13 +6648,13 @@ var $author$project$Main$update = F2(
 						A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 					if (newRoute.$ === 1) {
 						var slug = newRoute.a;
-						return A2($elm$core$Dict$member, slug, model.s) ? _Utils_Tuple2(
+						return A2($elm$core$Dict$member, slug, model.t) ? _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.E,
+								model.F,
 								$elm$url$Url$toString(url))) : _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -6665,7 +6665,7 @@ var $author$project$Main$update = F2(
 										$author$project$Main$fetchContent(slug),
 										A2(
 										$elm$browser$Browser$Navigation$pushUrl,
-										model.E,
+										model.F,
 										$elm$url$Url$toString(url))
 									])));
 					} else {
@@ -6675,7 +6675,7 @@ var $author$project$Main$update = F2(
 								{m: newRoute}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								model.E,
+								model.F,
 								$elm$url$Url$toString(url)));
 					}
 				} else {
@@ -6692,7 +6692,7 @@ var $author$project$Main$update = F2(
 					A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url));
 				if (newRoute.$ === 1) {
 					var slug = newRoute.a;
-					return A2($elm$core$Dict$member, slug, model.s) ? _Utils_Tuple2(
+					return A2($elm$core$Dict$member, slug, model.t) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{m: newRoute}),
@@ -6718,7 +6718,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								s: A3($elm$core$Dict$insert, slug, rendered, model.s)
+								t: A3($elm$core$Dict$insert, slug, rendered, model.t)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -6740,9 +6740,10 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$postsMetadata = _List_fromArray(
 	[
-		{y: 'May 23, 2026', A: 'contact-1997', G: 'contact appreciation post', w: 'contact (1997)'},
-		{y: 'April 26, 2026', A: 'ai-debilitation', G: 'think man think', w: 'ai debilitation and the value of sporadic thoughts'},
-		{y: 'January 21, 2021', A: 'next-gen-generators', G: 'generators beyond the basics', w: 'next(generators)'}
+		{u: 'Aug 17, 2026', y: 'implementation-details-of-the-conscious-compiler', C: 'on compilers and minds', r: 'implementation details of the conscious compiler'},
+		{u: 'May 23, 2026', y: 'contact-1997', C: 'contact appreciation post', r: 'contact (1997)'},
+		{u: 'April 26, 2026', y: 'ai-debilitation', C: 'think man think', r: 'ai debilitation and the value of sporadic thoughts'},
+		{u: 'January 21, 2021', y: 'next-gen-generators', C: 'generators beyond the basics', r: 'next(generators)'}
 	]);
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewPostTeaser = function (post) {
@@ -6765,14 +6766,14 @@ var $author$project$Main$viewPostTeaser = function (post) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/post/' + post.A),
+								$elm$html$Html$Attributes$href('/post/' + post.y),
 								A2($elm$html$Html$Attributes$style, 'text-decoration', 'none'),
 								A2($elm$html$Html$Attributes$style, 'color', '#0066cc'),
 								A2($elm$html$Html$Attributes$style, 'font-size', '26px')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.w)
+								$elm$html$Html$text(post.r)
 							]))
 					])),
 				A2(
@@ -6784,14 +6785,14 @@ var $author$project$Main$viewPostTeaser = function (post) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.y)
+						$elm$html$Html$text(post.u)
 					])),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(post.G)
+						$elm$html$Html$text(post.C)
 					]))
 			]));
 };
@@ -6864,7 +6865,7 @@ var $author$project$Main$viewPost = F2(
 			A2(
 				$elm$core$List$filter,
 				function (p) {
-					return _Utils_eq(p.A, slug);
+					return _Utils_eq(p.y, slug);
 				},
 				$author$project$Main$postsMetadata));
 		if (!_v0.$) {
@@ -6882,7 +6883,7 @@ var $author$project$Main$viewPost = F2(
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.w)
+								$elm$html$Html$text(post.r)
 							])),
 						A2(
 						$elm$html$Html$p,
@@ -6892,12 +6893,12 @@ var $author$project$Main$viewPost = F2(
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(post.y)
+								$elm$html$Html$text(post.u)
 							])),
 						A2(
 						$elm$core$Maybe$withDefault,
 						$elm$html$Html$text(''),
-						A2($elm$core$Dict$get, slug, model.s))
+						A2($elm$core$Dict$get, slug, model.t))
 					]));
 		} else {
 			return $author$project$Main$viewNotFound;
@@ -6967,7 +6968,7 @@ var $author$project$Main$view = function (model) {
 					}()
 					]))
 			]),
-		w: 'dankey@blog'
+		r: 'dankey@blog'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(

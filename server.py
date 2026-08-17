@@ -29,7 +29,7 @@ def run_server():
     PORT = 8000
     socketserver.TCPServer.allow_reuse_address = True
 
-    with socketserver.TCPServer(("", PORT), SPAHandler) as httpd:
+    with socketserver.TCPServer(("127.0.0.1", PORT), SPAHandler) as httpd:
         print(f"→ Blog running at http://localhost:{PORT}")
         print("   (Posts should now update immediately after you edit + save .txt files)")
         print("   (Ctrl+C to stop)")
